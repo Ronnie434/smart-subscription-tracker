@@ -34,7 +34,5 @@ app-store-assets/
 
 # Credentials
 credentials.json
-# iOS folder - let EAS generate it
-ios/
 
 
