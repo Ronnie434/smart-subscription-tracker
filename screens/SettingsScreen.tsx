@@ -43,15 +43,10 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={[]}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Settings</Text>
-        </View>
-
         {/* Account Section */}
-        <View style={styles.section}>
+        <View style={[styles.section, styles.firstSection]}>
           <Text style={styles.sectionTitle}>Account</Text>
           
           {/* User Info Card */}
@@ -118,21 +113,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    paddingTop: 0,
     paddingBottom: theme.spacing.xl,
   },
-  header: {
-    paddingHorizontal: theme.spacing.xl,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.md,
-  },
-  title: {
-    fontSize: 34,
-    fontWeight: '700',
-    color: theme.colors.text,
-  },
   section: {
-    marginTop: theme.spacing.lg,
+    marginTop: theme.spacing.md,
     paddingHorizontal: theme.spacing.xl,
+  },
+  firstSection: {
+    marginTop: 25,
   },
   sectionTitle: {
     fontSize: 14,

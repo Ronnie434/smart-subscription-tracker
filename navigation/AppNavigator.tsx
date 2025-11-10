@@ -32,6 +32,14 @@ type SubscriptionsStackParamList = {
   EditSubscription: { subscription: Subscription };
 };
 
+type StatsStackParamList = {
+  StatsHome: undefined;
+};
+
+type SettingsStackParamList = {
+  SettingsHome: undefined;
+};
+
 type RootTabParamList = {
   Subscriptions: undefined;
   Stats: undefined;
@@ -40,6 +48,8 @@ type RootTabParamList = {
 
 const AuthStack = createStackNavigator<AuthStackParamList>();
 const SubscriptionsStack = createStackNavigator<SubscriptionsStackParamList>();
+const StatsStack = createStackNavigator<StatsStackParamList>();
+const SettingsStack = createStackNavigator<SettingsStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
 function AuthNavigator() {
@@ -110,6 +120,70 @@ function SubscriptionsNavigator() {
         }}
       />
     </SubscriptionsStack.Navigator>
+  );
+}
+
+function StatsNavigator() {
+  return (
+    <StatsStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.background,
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 1,
+          borderBottomColor: theme.colors.border,
+        },
+        headerTintColor: theme.colors.text,
+        headerTitleStyle: {
+          fontWeight: '600',
+          fontSize: 18,
+        },
+        headerBackTitleVisible: false,
+        cardStyle: {
+          backgroundColor: theme.colors.background,
+        },
+      }}>
+      <StatsStack.Screen
+        name="StatsHome"
+        component={StatsScreen}
+        options={{
+          title: 'Statistics',
+        }}
+      />
+    </StatsStack.Navigator>
+  );
+}
+
+function SettingsNavigator() {
+  return (
+    <SettingsStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.background,
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 1,
+          borderBottomColor: theme.colors.border,
+        },
+        headerTintColor: theme.colors.text,
+        headerTitleStyle: {
+          fontWeight: '600',
+          fontSize: 18,
+        },
+        headerBackTitleVisible: false,
+        cardStyle: {
+          backgroundColor: theme.colors.background,
+        },
+      }}>
+      <SettingsStack.Screen
+        name="SettingsHome"
+        component={SettingsScreen}
+        options={{
+          title: 'Settings',
+        }}
+      />
+    </SettingsStack.Navigator>
   );
 }
 
@@ -211,14 +285,14 @@ export default function AppNavigator() {
         />
         <Tab.Screen
           name="Stats"
-          component={StatsScreen}
+          component={StatsNavigator}
           options={{
             tabBarLabel: 'Stats',
           }}
         />
         <Tab.Screen
           name="Settings"
-          component={SettingsScreen}
+          component={SettingsNavigator}
           options={{
             tabBarLabel: 'Settings',
           }}

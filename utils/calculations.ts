@@ -57,5 +57,142 @@ export const calculations = {
         return this.getDaysUntilRenewal(a.renewalDate) - this.getDaysUntilRenewal(b.renewalDate);
       });
   },
+
+  // New utility functions for Statistics screen
+
+  getBillingCycleDistribution(subscriptions: Subscription[]): { monthly: number; yearly: number } {
+    return subscriptions.reduce(
+      (acc, sub) => {
+        if (sub.billingCycle === 'monthly') {
+          acc.monthly += 1;
+        } else {
+          acc.yearly += 1;
+        }
+        return acc;
+      },
+      { monthly: 0, yearly: 0 }
+    );
+  },
+
+  getAverageMonthlyCost(subscriptions: Subscription[]): number {
+    if (subscriptions.length === 0) return 0;
+    const total = this.getTotalMonthlyCost(subscriptions);
+    return total / subscriptions.length;
+  },
+
+  getNextRenewalDate(subscriptions: Subscription[]): string | null {
+    if (subscriptions.length === 0) return null;
+    
+    const upcoming = subscriptions
+      .filter((sub) => this.getDaysUntilRenewal(sub.renewalDate) >= 0)
+      .sort((a, b) => this.getDaysUntilRenewal(a.renewalDate) - this.getDaysUntilRenewal(b.renewalDate));
+    
+    return upcoming.length > 0 ? upcoming[0].renewalDate : null;
+  },
+
+  getRenewalTimeline(subscriptions: Subscription[], days: number = 30): {
+    thisWeek: Subscription[];
+    nextWeek: Subscription[];
+    thisMonth: Subscription[];
+  } {
+    const now = new Date();
+    const thisWeekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const nextWeekEnd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const thisMonthEnd = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+
+    const upcoming = subscriptions.filter((sub) => {
+      const daysUntil = this.getDaysUntilRenewal(sub.renewalDate);
+      return daysUntil >= 0 && daysUntil <= days;
+    });
+
+    return {
+      thisWeek: upcoming.filter((sub) => {
+        const renewalDate = new Date(sub.renewalDate);
+        return renewalDate <= thisWeekEnd;
+      }),
+      nextWeek: upcoming.filter((sub) => {
+        const renewalDate = new Date(sub.renewalDate);
+        return renewalDate > thisWeekEnd && renewalDate <= nextWeekEnd;
+      }),
+      thisMonth: upcoming.filter((sub) => {
+        const renewalDate = new Date(sub.renewalDate);
+        return renewalDate > nextWeekEnd && renewalDate <= thisMonthEnd;
+      }),
+    };
+  },
+
+  getCategorySorted(subscriptions: Subscription[]): Array<{ category: string; total: number; percentage: number }> {
+    const breakdown = this.getCategoryBreakdown(subscriptions);
+    const totalCost = this.getTotalMonthlyCost(subscriptions);
+    
+    return Object.entries(breakdown)
+      .map(([category, total]) => ({
+        category,
+        total,
+        percentage: totalCost > 0 ? (total / totalCost) * 100 : 0,
+      }))
+      .sort((a, b) => b.total - a.total);
+  },
+
+  calculatePotentialSavings(subscriptions: Subscription[]): number {
+    // Calculate potential savings by switching monthly to yearly (assuming 15% discount)
+    const monthlySubs = subscriptions.filter((sub) => sub.billingCycle === 'monthly');
+    const yearlyCostOfMonthlySubs = monthlySubs.reduce((total, sub) => total + sub.cost * 12, 0);
+    const potentialYearlyCost = yearlyCostOfMonthlySubs * 0.85; // 15% discount
+    return yearlyCostOfMonthlySubs - potentialYearlyCost;
+  },
+
+  generateInsights(subscriptions: Subscription[]): Array<{ type: string; message: string; priority: 'high' | 'medium' | 'low' }> {
+    const insights: Array<{ type: string; message: string; priority: 'high' | 'medium' | 'low' }> = [];
+    
+    if (subscriptions.length === 0) {
+      return insights;
+    }
+
+    // Check for potential yearly savings
+    const monthlySubs = subscriptions.filter((sub) => sub.billingCycle === 'monthly');
+    if (monthlySubs.length > 0) {
+      const savings = this.calculatePotentialSavings(subscriptions);
+      if (savings > 10) {
+        insights.push({
+          type: 'savings',
+          message: `Switch ${monthlySubs.length} subscription${monthlySubs.length > 1 ? 's' : ''} to yearly billing and save up to $${savings.toFixed(2)}/year`,
+          priority: 'high',
+        });
+      }
+    }
+
+    // Check for high spending categories
+    const categorySorted = this.getCategorySorted(subscriptions);
+    if (categorySorted.length > 0 && categorySorted[0].percentage > 40) {
+      insights.push({
+        type: 'spending',
+        message: `${categorySorted[0].category} accounts for ${categorySorted[0].percentage.toFixed(0)}% of your spending`,
+        priority: 'medium',
+      });
+    }
+
+    // Check for upcoming renewals
+    const upcomingRenewals = this.getUpcomingRenewals(subscriptions, 7);
+    if (upcomingRenewals.length > 0) {
+      const totalRenewalCost = upcomingRenewals.reduce((sum, sub) => sum + sub.cost, 0);
+      insights.push({
+        type: 'renewal',
+        message: `${upcomingRenewals.length} renewal${upcomingRenewals.length > 1 ? 's' : ''} coming up this week ($${totalRenewalCost.toFixed(2)})`,
+        priority: 'high',
+      });
+    }
+
+    // Check for high number of subscriptions
+    if (subscriptions.length > 10) {
+      insights.push({
+        type: 'count',
+        message: `You have ${subscriptions.length} active subscriptions - consider reviewing for unused services`,
+        priority: 'low',
+      });
+    }
+
+    return insights.slice(0, 4); // Return top 4 insights
+  },
 };
 
