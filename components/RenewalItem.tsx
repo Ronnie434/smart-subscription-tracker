@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { theme } from '../constants/theme';
 import { Subscription } from '../types';
 import { calculations } from '../utils/calculations';
+import { parseLocalDate } from '../utils/dateHelpers';
 
 interface RenewalItemProps {
   subscription: Subscription;
@@ -24,7 +25,7 @@ export default function RenewalItem({ subscription, onPress }: RenewalItemProps)
     return theme.colors.textSecondary;
   };
 
-  const renewalDate = new Date(subscription.renewalDate);
+  const renewalDate = parseLocalDate(subscription.renewalDate);
   const dateString = renewalDate.toLocaleDateString('en-US', { 
     month: 'short', 
     day: 'numeric' 

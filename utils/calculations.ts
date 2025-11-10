@@ -1,4 +1,5 @@
 import { Subscription } from '../types';
+import { parseLocalDate } from './dateHelpers';
 
 export const calculations = {
   getMonthlyCost(subscription: Subscription): number {
@@ -38,11 +39,16 @@ export const calculations = {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const renewal = new Date(renewalDate);
+    // Use parseLocalDate to prevent timezone conversion issues
+    // "2025-12-13" should be treated as Dec 13 local time, not UTC midnight
+    const renewal = parseLocalDate(renewalDate);
     renewal.setHours(0, 0, 0, 0);
     
     const diffTime = renewal.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    // Use Math.round instead of Math.ceil to handle DST transitions correctly
+    // During DST fall back, there are 25 hours between two midnights, not 24
+    // Math.round(25/24) = 1 (correct), Math.ceil(25/24) = 2 (incorrect)
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
     
     return diffDays;
   },
@@ -100,6 +106,8 @@ export const calculations = {
     const nextWeekEnd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
     const thisMonthEnd = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 
+    // Filter subscriptions within the time window using getDaysUntilRenewal
+    // which now uses parseLocalDate for consistent timezone handling
     const upcoming = subscriptions.filter((sub) => {
       const daysUntil = this.getDaysUntilRenewal(sub.renewalDate);
       return daysUntil >= 0 && daysUntil <= days;
@@ -107,15 +115,16 @@ export const calculations = {
 
     return {
       thisWeek: upcoming.filter((sub) => {
-        const renewalDate = new Date(sub.renewalDate);
+        // Use parseLocalDate for consistent timezone handling in bucket assignment
+        const renewalDate = parseLocalDate(sub.renewalDate);
         return renewalDate <= thisWeekEnd;
       }),
       nextWeek: upcoming.filter((sub) => {
-        const renewalDate = new Date(sub.renewalDate);
+        const renewalDate = parseLocalDate(sub.renewalDate);
         return renewalDate > thisWeekEnd && renewalDate <= nextWeekEnd;
       }),
       thisMonth: upcoming.filter((sub) => {
-        const renewalDate = new Date(sub.renewalDate);
+        const renewalDate = parseLocalDate(sub.renewalDate);
         return renewalDate > nextWeekEnd && renewalDate <= thisMonthEnd;
       }),
     };

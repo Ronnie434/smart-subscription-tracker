@@ -13,6 +13,7 @@ import { theme } from '../constants/theme';
 import { Subscription } from '../types';
 import { storage } from '../utils/storage';
 import { calculations } from '../utils/calculations';
+import { parseLocalDate } from '../utils/dateHelpers';
 import StatCard from '../components/StatCard';
 import CategoryBar from '../components/CategoryBar';
 import InsightCard from '../components/InsightCard';
@@ -121,10 +122,14 @@ export default function StatsScreen() {
   const formatNextRenewal = () => {
     if (!nextRenewal) return 'None';
     const daysUntil = calculations.getDaysUntilRenewal(nextRenewal);
+    
     if (daysUntil === 0) return 'Today';
     if (daysUntil === 1) return 'Tomorrow';
     if (daysUntil <= 7) return `${daysUntil} days`;
-    const date = new Date(nextRenewal);
+    
+    // Use parseLocalDate to prevent timezone conversion issues
+    // "2025-12-13" should display as "Dec 13", not "Dec 12"
+    const date = parseLocalDate(nextRenewal);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
