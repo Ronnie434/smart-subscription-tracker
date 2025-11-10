@@ -9,10 +9,7 @@
       "distribution": "internal",
       "ios": {
         "simulator": true,
-        "buildConfiguration": "Debug",
-        "npm": {
-          "install": true
-        }
+        "buildConfiguration": "Debug"
       },
       "env": {
         "APP_ENV": "development"
@@ -22,10 +19,7 @@
       "distribution": "internal",
       "ios": {
         "simulator": false,
-        "buildConfiguration": "Release",
-        "npm": {
-          "install": true
-        }
+        "buildConfiguration": "Release"
       },
       "env": {
         "APP_ENV": "preview"
@@ -37,10 +31,7 @@
       "ios": {
         "simulator": false,
         "buildConfiguration": "Release",
-        "autoIncrement": true,
-        "npm": {
-          "install": true
-        }
+        "autoIncrement": true
       },
       "android": {
         "buildType": "app-bundle",
