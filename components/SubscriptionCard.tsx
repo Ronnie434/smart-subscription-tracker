@@ -1,6 +1,6 @@
 import React, { useState, memo } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform, Image, Linking, Alert } from 'react-native';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { Subscription } from '../types';
 import { calculations } from '../utils/calculations';
 import * as Haptics from 'expo-haptics';
@@ -26,6 +26,7 @@ const SubscriptionCard = memo(function SubscriptionCard({
   onPress,
   onLongPress,
 }: SubscriptionCardProps) {
+  const { theme } = useTheme();
   const [logoError, setLogoError] = useState(false);
   const monthlyCost = calculations.getMonthlyCost(subscription);
 
@@ -82,6 +83,63 @@ const SubscriptionCard = memo(function SubscriptionCard({
       Alert.alert('Error', 'Failed to open website');
     }
   };
+
+  const styles = StyleSheet.create({
+    card: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.borderRadius.md,
+      padding: 16,
+      marginBottom: theme.spacing.md,
+    },
+    pressed: {
+      opacity: 0.7,
+      transform: [{ scale: 0.98 }],
+    },
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    iconContainer: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    logoContainer: {
+      width: 50,
+      height: 50,
+    },
+    logoPressed: {
+      opacity: 0.6,
+    },
+    logoImage: {
+      width: 50,
+      height: 50,
+      borderRadius: 12,
+    },
+    iconText: {
+      color: '#FFFFFF',
+      fontSize: 20,
+      fontWeight: '700',
+    },
+    contentContainer: {
+      marginLeft: 12,
+      flex: 1,
+      justifyContent: 'space-between',
+    },
+    name: {
+      ...theme.typography.body,
+      color: theme.colors.text,
+      fontSize: 17,
+      marginBottom: 2,
+    },
+    price: {
+      ...theme.typography.caption,
+      color: theme.colors.textSecondary,
+      fontSize: 15,
+    },
+  });
 
   // Render either logo or fallback icon
   const renderIcon = () => {
@@ -142,61 +200,4 @@ const SubscriptionCard = memo(function SubscriptionCard({
 });
 
 export default SubscriptionCard;
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
-    padding: 16,
-    marginBottom: theme.spacing.md,
-  },
-  pressed: {
-    opacity: 0.7,
-    transform: [{ scale: 0.98 }],
-  },
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoContainer: {
-    width: 50,
-    height: 50,
-  },
-  logoPressed: {
-    opacity: 0.6,
-  },
-  logoImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 12,
-  },
-  iconText: {
-    color: '#FFFFFF',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  contentContainer: {
-    marginLeft: 12,
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  name: {
-    ...theme.typography.body,
-    color: theme.colors.text,
-    fontSize: 17,
-    marginBottom: 2,
-  },
-  price: {
-    ...theme.typography.caption,
-    color: theme.colors.textSecondary,
-    fontSize: 15,
-  },
-});
 

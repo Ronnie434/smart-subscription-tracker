@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { theme } from '../constants/theme';
+import { useTheme, ThemeMode } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 
 // Available user icon options
@@ -28,6 +28,7 @@ const ICON_STORAGE_KEY = '@user_icon_preference';
 
 export default function SettingsScreen() {
   const { user, signOut } = useAuth();
+  const { theme, themeMode, setThemeMode } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState<string>('person');
   const [showIconPicker, setShowIconPicker] = useState(false);
@@ -70,6 +71,21 @@ export default function SettingsScreen() {
     setShowIconPicker(true);
   };
 
+  const handleThemeToggle = async () => {
+    if (Platform.OS === 'ios') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    
+    try {
+      // Toggle between light and dark only
+      const newMode: ThemeMode = themeMode === 'dark' ? 'light' : 'dark';
+      await setThemeMode(newMode);
+    } catch (error) {
+      console.error('Error changing theme:', error);
+      Alert.alert('Error', 'Failed to change theme. Please try again.');
+    }
+  };
+
   const handleSignOut = () => {
     Alert.alert(
       'Sign Out',
@@ -100,6 +116,231 @@ export default function SettingsScreen() {
       ]
     );
   };
+
+  // Create styles inside component to access theme
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingTop: 0,
+      paddingBottom: theme.spacing.xl,
+    },
+    section: {
+      marginTop: theme.spacing.md,
+      paddingHorizontal: theme.spacing.xl,
+    },
+    firstSection: {
+      marginTop: 25,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: theme.spacing.md,
+    },
+    card: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.md,
+      marginBottom: theme.spacing.md,
+    },
+    themeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    themeRowLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    themeIconContainer: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: `${theme.colors.primary}20`,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: theme.spacing.md,
+    },
+    themeLabel: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.colors.text,
+    },
+    themeToggleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    themeToggleText: {
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+      fontWeight: '500',
+    },
+    userInfoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    avatarContainer: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: `${theme.colors.primary}20`,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: theme.spacing.md,
+    },
+    userInfo: {
+      flex: 1,
+    },
+    userName: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginBottom: 4,
+    },
+    userEmail: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+    },
+    tapToChangeText: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+      marginTop: 8,
+      textAlign: 'center',
+    },
+    signOutButton: {
+      backgroundColor: theme.colors.error,
+      borderRadius: theme.borderRadius.md,
+      paddingVertical: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: theme.spacing.sm,
+    },
+    signOutButtonDisabled: {
+      opacity: 0.6,
+    },
+    signOutButtonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    infoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: theme.spacing.sm,
+    },
+    infoLabel: {
+      fontSize: 16,
+      color: theme.colors.text,
+    },
+    infoValue: {
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: theme.colors.border,
+      marginVertical: theme.spacing.xs,
+    },
+    footer: {
+      marginTop: theme.spacing.xxl,
+      paddingHorizontal: theme.spacing.xl,
+      alignItems: 'center',
+    },
+    footerText: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+      textAlign: 'center',
+    },
+    modalOverlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    modalBackdrop: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+      backgroundColor: theme.colors.surface,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+      maxHeight: '70%',
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: theme.colors.text,
+    },
+    modalCloseButton: {
+      padding: 4,
+    },
+    iconGrid: {
+      maxHeight: 400,
+    },
+    iconGridContent: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      padding: 8,
+    },
+    iconOption: {
+      width: '33.33%',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 8,
+      paddingVertical: 16,
+    },
+    iconOptionSelected: {
+      backgroundColor: `${theme.colors.primary}10`,
+      borderRadius: 12,
+    },
+    iconCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: `${theme.colors.primary}20`,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    iconCircleSelected: {
+      backgroundColor: theme.colors.primary,
+    },
+    iconLabel: {
+      fontSize: 12,
+      color: theme.colors.text,
+      textAlign: 'center',
+      fontWeight: '500',
+    },
+    iconLabelSelected: {
+      color: theme.colors.primary,
+      fontWeight: '600',
+    },
+  });
 
   return (
     <SafeAreaView style={styles.container} edges={[]}>
@@ -143,7 +384,42 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* App Info Section */}
+        {/* Appearance Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Appearance</Text>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={handleThemeToggle}
+            activeOpacity={0.7}>
+            <View style={styles.themeRow}>
+              <View style={styles.themeRowLeft}>
+                <View style={styles.themeIconContainer}>
+                  <Ionicons
+                    name={themeMode === 'dark' ? 'moon' : 'sunny'}
+                    size={22}
+                    color={theme.colors.primary}
+                  />
+                </View>
+                <Text style={styles.themeLabel}>Theme</Text>
+              </View>
+              <View style={styles.themeToggleContainer}>
+                {themeMode === 'dark' ? (
+                  <>
+                    <Ionicons name="chevron-back" size={16} color={theme.colors.textSecondary} />
+                    <Text style={styles.themeToggleText}>Dark Mode</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.themeToggleText}>Light Mode</Text>
+                    <Ionicons name="chevron-forward" size={16} color={theme.colors.textSecondary} />
+                  </>
+                )}
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* About Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
           <View style={styles.card}>
@@ -224,193 +500,3 @@ export default function SettingsScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingTop: 0,
-    paddingBottom: theme.spacing.xl,
-  },
-  section: {
-    marginTop: theme.spacing.md,
-    paddingHorizontal: theme.spacing.xl,
-  },
-  firstSection: {
-    marginTop: 25,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: theme.spacing.md,
-  },
-  card: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-  },
-  userInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: `${theme.colors.primary}20`,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: theme.spacing.md,
-  },
-  userInfo: {
-    flex: 1,
-  },
-  userName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-  },
-  tapToChangeText: {
-    fontSize: 12,
-    color: theme.colors.textSecondary,
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  signOutButton: {
-    backgroundColor: theme.colors.error,
-    borderRadius: theme.borderRadius.md,
-    paddingVertical: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: theme.spacing.sm,
-  },
-  signOutButtonDisabled: {
-    opacity: 0.6,
-  },
-  signOutButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: theme.spacing.sm,
-  },
-  infoLabel: {
-    fontSize: 16,
-    color: theme.colors.text,
-  },
-  infoValue: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: theme.colors.border,
-    marginVertical: theme.spacing.xs,
-  },
-  footer: {
-    marginTop: theme.spacing.xxl,
-    paddingHorizontal: theme.spacing.xl,
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    textAlign: 'center',
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  modalBackdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: theme.colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
-    maxHeight: '70%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: theme.colors.text,
-  },
-  modalCloseButton: {
-    padding: 4,
-  },
-  iconGrid: {
-    maxHeight: 400,
-  },
-  iconGridContent: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 8,
-  },
-  iconOption: {
-    width: '33.33%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 8,
-    paddingVertical: 16,
-  },
-  iconOptionSelected: {
-    backgroundColor: `${theme.colors.primary}10`,
-    borderRadius: 12,
-  },
-  iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: `${theme.colors.primary}20`,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  iconCircleSelected: {
-    backgroundColor: theme.colors.primary,
-  },
-  iconLabel: {
-    fontSize: 12,
-    color: theme.colors.text,
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-  iconLabelSelected: {
-    color: theme.colors.primary,
-    fontWeight: '600',
-  },
-});

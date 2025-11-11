@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert, Platform } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { storage } from '../utils/storage';
 import SubscriptionForm from '../components/SubscriptionForm';
 import { Subscription } from '../types';
@@ -18,6 +18,7 @@ type AddSubscriptionScreenRouteProp = RouteProp<SubscriptionsStackParamList, 'Ad
 type AddSubscriptionScreenNavigationProp = StackNavigationProp<SubscriptionsStackParamList, 'AddSubscription'>;
 
 export default function AddSubscriptionScreen() {
+  const { theme } = useTheme();
   const navigation = useNavigation<AddSubscriptionScreenNavigationProp>();
   const route = useRoute<AddSubscriptionScreenRouteProp>();
   const [saving, setSaving] = useState(false);
@@ -109,6 +110,13 @@ export default function AddSubscriptionScreen() {
     navigation.goBack();
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <SubscriptionForm
@@ -119,11 +127,4 @@ export default function AddSubscriptionScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-});
 

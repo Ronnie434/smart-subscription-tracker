@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { storage } from '../utils/storage';
 import { dateHelpers } from '../utils/dateHelpers';
 import { calculations } from '../utils/calculations';
@@ -38,6 +38,7 @@ const SERVICE_COLORS: { [key: string]: string } = {
 };
 
 export default function EditSubscriptionScreen() {
+  const { theme } = useTheme();
   const navigation = useNavigation<EditSubscriptionScreenNavigationProp>();
   const route = useRoute<EditSubscriptionScreenRouteProp>();
   const { subscription: initialSubscription } = route.params;
@@ -133,6 +134,82 @@ export default function EditSubscriptionScreen() {
   const monthlyCost = calculations.getMonthlyCost(subscription);
   const renewalDateFormatted = dateHelpers.formatFullDate(subscription.renewalDate);
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    centered: {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    contentContainer: {
+      flex: 1,
+      paddingHorizontal: 24,
+      paddingTop: 32,
+      alignItems: 'center',
+    },
+    iconContainer: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    logoContainer: {
+      width: 60,
+      height: 60,
+    },
+    logoImage: {
+      width: 60,
+      height: 60,
+      borderRadius: 15,
+    },
+    iconText: {
+      color: '#FFFFFF',
+      fontSize: 28,
+      fontWeight: '700',
+    },
+    serviceName: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: theme.colors.text,
+      marginTop: 16,
+      textAlign: 'center',
+    },
+    price: {
+      fontSize: 20,
+      color: theme.colors.text,
+      marginTop: 8,
+      textAlign: 'center',
+    },
+    renewalSection: {
+      marginTop: 24,
+      alignItems: 'center',
+    },
+    renewalLabel: {
+      fontSize: 15,
+      color: '#8E8E93',
+      marginBottom: 4,
+    },
+    renewalDate: {
+      fontSize: 17,
+      color: theme.colors.text,
+    },
+    editButton: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+    },
+    editButtonPressed: {
+      opacity: 0.6,
+    },
+    editButtonText: {
+      fontSize: 17,
+      color: theme.colors.primary,
+      fontWeight: '600',
+    },
+  });
+
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
@@ -163,79 +240,3 @@ export default function EditSubscriptionScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  centered: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 32,
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoContainer: {
-    width: 60,
-    height: 60,
-  },
-  logoImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 15,
-  },
-  iconText: {
-    color: '#FFFFFF',
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  serviceName: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: theme.colors.text,
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  price: {
-    fontSize: 20,
-    color: theme.colors.text,
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  renewalSection: {
-    marginTop: 24,
-    alignItems: 'center',
-  },
-  renewalLabel: {
-    fontSize: 15,
-    color: '#8E8E93',
-    marginBottom: 4,
-  },
-  renewalDate: {
-    fontSize: 17,
-    color: theme.colors.text,
-  },
-  editButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  editButtonPressed: {
-    opacity: 0.6,
-  },
-  editButtonText: {
-    fontSize: 17,
-    color: theme.colors.primary,
-    fontWeight: '600',
-  },
-});

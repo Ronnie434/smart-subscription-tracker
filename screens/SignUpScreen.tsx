@@ -12,7 +12,7 @@ import {
   Image,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import AuthInput from '../components/AuthInput';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -42,6 +42,7 @@ const getPasswordStrength = (password: string): 'weak' | 'medium' | 'strong' => 
 };
 
 export default function SignUpScreen({ onNavigateToSignIn }: SignUpScreenProps) {
+  const { theme } = useTheme();
   const { signUp, loading: authLoading } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -159,6 +160,97 @@ export default function SignUpScreen({ onNavigateToSignIn }: SignUpScreenProps) 
   };
 
   const isProcessing = isLoading || authLoading;
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: theme.spacing.xl,
+      paddingTop: 60,
+      paddingBottom: 40,
+    },
+    header: {
+      alignItems: 'center',
+      marginBottom: theme.spacing.xl,
+    },
+    logoContainer: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: theme.spacing.lg,
+    },
+    logoImage: {
+      width: 96,
+      height: 96,
+      borderRadius: 21.5,
+    },
+    appName: {
+      fontSize: 36,
+      fontWeight: '700',
+      color: theme.colors.text,
+      marginBottom: theme.spacing.xs,
+    },
+    tagline: {
+      fontSize: 16,
+      color: '#8E8E93',
+    },
+    formContainer: {
+      flex: 1,
+      paddingTop: theme.spacing.md,
+    },
+    strengthContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: theme.spacing.md,
+      marginTop: -theme.spacing.xs,
+    },
+    strengthBars: {
+      flexDirection: 'row',
+      gap: 4,
+      marginRight: theme.spacing.md,
+    },
+    strengthBar: {
+      width: 40,
+      height: 4,
+      borderRadius: 2,
+    },
+    strengthText: {
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    createButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.borderRadius.md,
+      paddingVertical: 16,
+      alignItems: 'center',
+      marginTop: theme.spacing.md,
+    },
+    createButtonDisabled: {
+      opacity: 0.6,
+    },
+    createButtonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: theme.spacing.xl,
+    },
+    footerText: {
+      color: theme.colors.text,
+      fontSize: 16,
+    },
+    signInLink: {
+      color: theme.colors.primary,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+  });
 
   return (
     <KeyboardAvoidingView
@@ -299,94 +391,3 @@ export default function SignUpScreen({ onNavigateToSignIn }: SignUpScreenProps) 
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: theme.spacing.xl,
-    paddingTop: 60,
-    paddingBottom: 40,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: theme.spacing.xl,
-  },
-  logoContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: theme.spacing.lg,
-  },
-  logoImage: {
-    width: 96,
-    height: 96,
-    borderRadius: 21.5,
-  },
-  appName: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
-  },
-  tagline: {
-    fontSize: 16,
-    color: '#8E8E93',
-  },
-  formContainer: {
-    flex: 1,
-    paddingTop: theme.spacing.md,
-  },
-  strengthContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: theme.spacing.md,
-    marginTop: -theme.spacing.xs,
-  },
-  strengthBars: {
-    flexDirection: 'row',
-    gap: 4,
-    marginRight: theme.spacing.md,
-  },
-  strengthBar: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-  },
-  strengthText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  createButton: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.md,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: theme.spacing.md,
-  },
-  createButtonDisabled: {
-    opacity: 0.6,
-  },
-  createButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: theme.spacing.xl,
-  },
-  footerText: {
-    color: theme.colors.text,
-    fontSize: 16,
-  },
-  signInLink: {
-    color: theme.colors.primary,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

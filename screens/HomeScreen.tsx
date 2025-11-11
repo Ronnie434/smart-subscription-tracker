@@ -12,7 +12,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { Subscription } from '../types';
 import { storage } from '../utils/storage';
 import { calculations } from '../utils/calculations';
@@ -36,6 +36,7 @@ interface HomeScreenProps {
 }
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
+  const { theme } = useTheme();
   const { user } = useAuth();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
@@ -243,6 +244,54 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const monthlyCount = subscriptions.filter(sub => sub.billingCycle === 'monthly').length;
   const yearlyCount = subscriptions.filter(sub => sub.billingCycle === 'yearly').length;
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 24,
+      paddingTop: 16,
+      paddingBottom: 24,
+    },
+    monthlyTotal: {
+      fontSize: 48,
+      fontWeight: 'bold',
+      color: theme.colors.text,
+      marginBottom: 8,
+    },
+    perMonthLabel: {
+      fontSize: 15,
+      color: theme.colors.textSecondary,
+      marginBottom: 4,
+    },
+    breakdownLabel: {
+      fontSize: 13,
+      color: theme.colors.textSecondary,
+      marginBottom: 12,
+    },
+    sectionTitle: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: theme.colors.text,
+    },
+    listContainer: {
+      paddingHorizontal: 16,
+      paddingBottom: 24,
+      gap: 12,
+    },
+    emptyContainer: {
+      flex: 1,
+    },
+    addButton: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+    },
+    addButtonPressed: {
+      opacity: 0.6,
+    },
+  });
+
   if (loading) {
     return <LoadingIndicator />;
   }
@@ -285,52 +334,4 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 24,
-  },
-  monthlyTotal: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 8,
-  },
-  perMonthLabel: {
-    fontSize: 15,
-    color: '#8E8E93',
-    marginBottom: 4,
-  },
-  breakdownLabel: {
-    fontSize: 13,
-    color: '#8E8E93',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  listContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
-    gap: 12,
-  },
-  emptyContainer: {
-    flex: 1,
-  },
-  addButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  addButtonPressed: {
-    opacity: 0.6,
-  },
-});
 

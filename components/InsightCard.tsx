@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface InsightCardProps {
   type: 'savings' | 'spending' | 'renewal' | 'count' | 'info';
@@ -9,6 +9,8 @@ interface InsightCardProps {
 }
 
 export default function InsightCard({ type, message, priority = 'medium' }: InsightCardProps) {
+  const { theme } = useTheme();
+  
   const getIconAndColor = () => {
     switch (type) {
       case 'savings':
@@ -39,6 +41,32 @@ export default function InsightCard({ type, message, priority = 'medium' }: Insi
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      backgroundColor: theme.colors.card,
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.md,
+      marginBottom: theme.spacing.md,
+      borderLeftWidth: 4,
+    },
+    iconContainer: {
+      marginRight: theme.spacing.md,
+      justifyContent: 'center',
+    },
+    icon: {
+      fontSize: 24,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    message: {
+      ...theme.typography.body,
+      color: theme.colors.text,
+    },
+  });
+
   return (
     <View
       style={[
@@ -56,29 +84,3 @@ export default function InsightCard({ type, message, priority = 'medium' }: Insi
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-    borderLeftWidth: 4,
-  },
-  iconContainer: {
-    marginRight: theme.spacing.md,
-    justifyContent: 'center',
-  },
-  icon: {
-    fontSize: 24,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  message: {
-    ...theme.typography.body,
-    color: theme.colors.text,
-  },
-});

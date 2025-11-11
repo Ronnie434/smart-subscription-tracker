@@ -1,7 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../constants/theme';
+import { createTheme } from '../constants/theme';
 
 interface Props {
   children: ReactNode;
@@ -19,6 +19,9 @@ interface State {
  * logs those errors, and displays a fallback UI instead of crashing the app.
  */
 class ErrorBoundary extends Component<Props, State> {
+  // Use a static dark theme for error boundary - ensures it works even if ThemeProvider fails
+  private theme = createTheme('dark');
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -62,6 +65,76 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   render() {
+    const styles = StyleSheet.create({
+      container: {
+        flex: 1,
+        backgroundColor: this.theme.colors.background,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: this.theme.spacing.xl,
+      },
+      content: {
+        alignItems: 'center',
+        maxWidth: 400,
+        width: '100%',
+      },
+      iconContainer: {
+        marginBottom: this.theme.spacing.xl,
+      },
+      title: {
+        fontSize: 24,
+        fontWeight: '700',
+        color: this.theme.colors.text,
+        textAlign: 'center',
+        marginBottom: this.theme.spacing.md,
+      },
+      message: {
+        fontSize: 16,
+        color: '#8E8E93',
+        textAlign: 'center',
+        lineHeight: 24,
+        marginBottom: this.theme.spacing.xxl,
+      },
+      reloadButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: this.theme.colors.primary,
+        borderRadius: this.theme.borderRadius.md,
+        paddingVertical: 16,
+        paddingHorizontal: 32,
+        minWidth: 200,
+      },
+      buttonIcon: {
+        marginRight: this.theme.spacing.sm,
+      },
+      reloadButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '600',
+      },
+      errorDetails: {
+        marginTop: this.theme.spacing.xl,
+        backgroundColor: '#1C1C1E',
+        borderRadius: this.theme.borderRadius.md,
+        padding: this.theme.spacing.md,
+        maxHeight: 200,
+        width: '100%',
+      },
+      errorDetailsTitle: {
+        color: this.theme.colors.error,
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: this.theme.spacing.sm,
+      },
+      errorDetailsText: {
+        color: '#8E8E93',
+        fontSize: 12,
+        fontFamily: 'Courier',
+        lineHeight: 18,
+      },
+    });
+
     if (this.state.hasError) {
       // Custom fallback UI provided
       if (this.props.fallback) {
@@ -73,7 +146,7 @@ class ErrorBoundary extends Component<Props, State> {
         <View style={styles.container}>
           <View style={styles.content}>
             <View style={styles.iconContainer}>
-              <Ionicons name="alert-circle" size={64} color={theme.colors.error} />
+              <Ionicons name="alert-circle" size={64} color={this.theme.colors.error} />
             </View>
 
             <Text style={styles.title}>Oops! Something went wrong</Text>
@@ -111,75 +184,5 @@ class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.xl,
-  },
-  content: {
-    alignItems: 'center',
-    maxWidth: 400,
-    width: '100%',
-  },
-  iconContainer: {
-    marginBottom: theme.spacing.xl,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: theme.colors.text,
-    textAlign: 'center',
-    marginBottom: theme.spacing.md,
-  },
-  message: {
-    fontSize: 16,
-    color: '#8E8E93',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: theme.spacing.xxl,
-  },
-  reloadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.md,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    minWidth: 200,
-  },
-  buttonIcon: {
-    marginRight: theme.spacing.sm,
-  },
-  reloadButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  errorDetails: {
-    marginTop: theme.spacing.xl,
-    backgroundColor: '#1C1C1E',
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    maxHeight: 200,
-    width: '100%',
-  },
-  errorDetailsTitle: {
-    color: theme.colors.error,
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: theme.spacing.sm,
-  },
-  errorDetailsText: {
-    color: '#8E8E93',
-    fontSize: 12,
-    fontFamily: 'Courier',
-    lineHeight: 18,
-  },
-});
 
 export default ErrorBoundary;

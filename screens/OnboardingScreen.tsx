@@ -9,7 +9,7 @@ import {
   ViewToken,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { setOnboardingComplete } from '../utils/storage';
 
 const { width } = Dimensions.get('window');
@@ -47,6 +47,7 @@ interface OnboardingScreenProps {
 }
 
 export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
+  const { theme } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
 
@@ -66,6 +67,72 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     await setOnboardingComplete();
     onComplete();
   };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    slide: {
+      width,
+      flex: 1,
+      justifyContent: 'space-between',
+      paddingTop: 100,
+      paddingBottom: 60,
+    },
+    content: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: theme.spacing.xl,
+    },
+    title: {
+      fontSize: 32,
+      fontWeight: 'bold',
+      color: theme.colors.text,
+      textAlign: 'center',
+      marginTop: theme.spacing.xxl,
+      marginBottom: theme.spacing.md,
+    },
+    subtitle: {
+      fontSize: 18,
+      color: theme.colors.textSecondary,
+      textAlign: 'center',
+      lineHeight: 26,
+    },
+    footer: {
+      paddingHorizontal: theme.spacing.xl,
+      paddingBottom: theme.spacing.md,
+    },
+    paginationContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: theme.spacing.xl,
+    },
+    dot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: theme.colors.border,
+      marginHorizontal: 4,
+    },
+    activeDot: {
+      backgroundColor: theme.colors.primary,
+      width: 24,
+    },
+    button: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 16,
+      borderRadius: theme.borderRadius.md,
+      alignItems: 'center',
+    },
+    buttonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+  });
 
   const renderSlide = ({ item }: { item: OnboardingSlide }) => (
     <View style={styles.slide}>
@@ -114,69 +181,3 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  slide: {
-    width,
-    flex: 1,
-    justifyContent: 'space-between',
-    paddingTop: 100,
-    paddingBottom: 60,
-  },
-  content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: theme.spacing.xl,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-    textAlign: 'center',
-    marginTop: theme.spacing.xxl,
-    marginBottom: theme.spacing.md,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: theme.colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 26,
-  },
-  footer: {
-    paddingHorizontal: theme.spacing.xl,
-    paddingBottom: theme.spacing.md,
-  },
-  paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: theme.spacing.xl,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: theme.colors.border,
-    marginHorizontal: 4,
-  },
-  activeDot: {
-    backgroundColor: theme.colors.primary,
-    width: 24,
-  },
-  button: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 16,
-    borderRadius: theme.borderRadius.md,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

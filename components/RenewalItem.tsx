@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { Subscription } from '../types';
 import { calculations } from '../utils/calculations';
 import { parseLocalDate } from '../utils/dateHelpers';
@@ -11,6 +11,7 @@ interface RenewalItemProps {
 }
 
 export default function RenewalItem({ subscription, onPress }: RenewalItemProps) {
+  const { theme } = useTheme();
   const daysUntil = calculations.getDaysUntilRenewal(subscription.renewalDate);
   
   const getDaysText = () => {
@@ -26,9 +27,49 @@ export default function RenewalItem({ subscription, onPress }: RenewalItemProps)
   };
 
   const renewalDate = parseLocalDate(subscription.renewalDate);
-  const dateString = renewalDate.toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: 'numeric' 
+  const dateString = renewalDate.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric'
+  });
+
+  const styles = StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.card,
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.md,
+      marginBottom: theme.spacing.sm,
+    },
+    content: {
+      flex: 1,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.spacing.xs,
+    },
+    name: {
+      ...theme.typography.bodyBold,
+      color: theme.colors.text,
+      flex: 1,
+    },
+    cost: {
+      ...theme.typography.bodyBold,
+      color: theme.colors.primary,
+      marginLeft: theme.spacing.sm,
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    date: {
+      ...theme.typography.caption,
+      color: theme.colors.textSecondary,
+    },
+    daysUntil: {
+      ...theme.typography.captionBold,
+    },
   });
 
   return (
@@ -52,43 +93,3 @@ export default function RenewalItem({ subscription, onPress }: RenewalItemProps)
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
-  },
-  content: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing.xs,
-  },
-  name: {
-    ...theme.typography.bodyBold,
-    color: theme.colors.text,
-    flex: 1,
-  },
-  cost: {
-    ...theme.typography.bodyBold,
-    color: theme.colors.primary,
-    marginLeft: theme.spacing.sm,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  date: {
-    ...theme.typography.caption,
-    color: theme.colors.textSecondary,
-  },
-  daysUntil: {
-    ...theme.typography.captionBold,
-  },
-});

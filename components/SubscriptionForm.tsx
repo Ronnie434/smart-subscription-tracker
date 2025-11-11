@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { Subscription, BillingCycle } from '../types';
 import { extractDomain, getCompanyNames } from '../utils/domainHelpers';
 import * as Haptics from 'expo-haptics';
@@ -37,6 +37,7 @@ const CATEGORIES = [
 ];
 
 export default function SubscriptionForm({ subscription, onSubmit, onCancel, isSubmitting = false }: SubscriptionFormProps) {
+  const { theme } = useTheme();
   const [name, setName] = useState(subscription?.name || '');
   const [cost, setCost] = useState(subscription?.cost ? subscription.cost.toFixed(2) : '');
   const [description, setDescription] = useState(subscription?.description || '');
@@ -186,6 +187,307 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
     if (isNaN(costNum) || costNum <= 0) return '0.00';
     return costNum.toFixed(2);
   };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingBottom: 100,
+    },
+    form: {
+      paddingHorizontal: 16,
+      paddingTop: 24,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: '700',
+      color: theme.colors.text,
+      marginBottom: 32,
+    },
+    field: {
+      marginBottom: 16,
+    },
+    label: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginBottom: 8,
+    },
+    inputContainer: {
+      position: 'relative',
+    },
+    input: {
+      color: theme.colors.text,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      borderWidth: 1,
+      borderColor: 'transparent',
+      fontSize: 16,
+      height: 52,
+    },
+    textArea: {
+      height: 100,
+      paddingTop: 16,
+    },
+    inputFocused: {
+      borderColor: theme.colors.primary,
+      borderWidth: 2,
+    },
+    inputError: {
+      borderColor: theme.colors.error,
+      borderWidth: 2,
+    },
+    errorText: {
+      fontSize: 13,
+      color: theme.colors.error,
+      marginTop: 4,
+      marginLeft: 4,
+    },
+    costContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: 'transparent',
+      paddingHorizontal: 16,
+      height: 52,
+    },
+    currencySymbol: {
+      color: theme.colors.text,
+      fontSize: 18,
+      fontWeight: '600',
+      marginRight: 4,
+    },
+    costInput: {
+      color: theme.colors.text,
+      flex: 1,
+      fontSize: 16,
+      paddingVertical: 0,
+      height: 52,
+      paddingRight: 8,
+    },
+    chevronIcon: {
+      marginLeft: 8,
+    },
+    segmentedControl: {
+      flexDirection: 'row',
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 4,
+      height: 52,
+    },
+    segmentButton: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 8,
+      paddingVertical: 12,
+    },
+    segmentButtonLeft: {
+      marginRight: 2,
+    },
+    segmentButtonRight: {
+      marginLeft: 2,
+    },
+    segmentButtonActive: {
+      backgroundColor: theme.colors.primary,
+    },
+    segmentButtonPressed: {
+      opacity: 0.7,
+    },
+    segmentButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text,
+    },
+    segmentButtonTextActive: {
+      color: '#FFFFFF',
+    },
+    calculatedCostContainer: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      marginTop: 24,
+      marginBottom: 16,
+    },
+    calculatedCost: {
+      fontSize: 32,
+      fontWeight: '700',
+      color: theme.colors.text,
+      letterSpacing: -0.5,
+    },
+    calculatedCostSuffix: {
+      fontSize: 20,
+      fontWeight: '500',
+      color: theme.colors.textSecondary,
+      marginLeft: 4,
+    },
+    buttonContainer: {
+      padding: 16,
+      paddingBottom: Platform.OS === 'ios' ? 32 : 16,
+      backgroundColor: theme.colors.background,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+    },
+    submitButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: 50,
+    },
+    submitButtonPressed: {
+      opacity: 0.8,
+      transform: [{ scale: 0.98 }],
+    },
+    submitButtonText: {
+      color: '#FFFFFF',
+      fontSize: 17,
+      fontWeight: '700',
+    },
+    suggestionsContainer: {
+      position: 'absolute',
+      top: '100%',
+      left: 0,
+      right: 0,
+      marginTop: 4,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      maxHeight: 250,
+      zIndex: 1000,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 12,
+        },
+        android: {
+          elevation: 8,
+        },
+      }),
+    },
+    suggestionsList: {
+      maxHeight: 250,
+    },
+    suggestionItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    suggestionItemPressed: {
+      backgroundColor: theme.colors.background,
+    },
+    suggestionItemLast: {
+      borderBottomWidth: 0,
+    },
+    suggestionContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    suggestionLogo: {
+      width: 24,
+      height: 24,
+      borderRadius: 6,
+      marginRight: 12,
+      backgroundColor: theme.colors.border,
+    },
+    suggestionText: {
+      fontSize: 16,
+      color: theme.colors.text,
+      fontWeight: '500',
+    },
+    switchRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    dateButton: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    dateButtonPressed: {
+      opacity: 0.7,
+    },
+    dateButtonText: {
+      fontSize: 16,
+      color: theme.colors.text,
+      fontWeight: '500',
+    },
+    helperText: {
+      fontSize: 13,
+      color: theme.colors.textSecondary,
+      marginTop: 4,
+      marginLeft: 4,
+    },
+    modalOverlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+      backgroundColor: theme.colors.surface,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    modalTitle: {
+      fontSize: 17,
+      fontWeight: '600',
+      color: theme.colors.text,
+    },
+    modalDoneButton: {
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+    },
+    modalDoneText: {
+      fontSize: 17,
+      fontWeight: '600',
+      color: theme.colors.primary,
+    },
+    submitButtonDisabled: {
+      opacity: 0.6,
+    },
+    submitButtonContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    buttonLoader: {
+      marginRight: 8,
+    },
+  });
 
   return (
     <KeyboardAvoidingView
@@ -544,315 +846,3 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 100,
-  },
-  form: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: theme.colors.text,
-    marginBottom: 32,
-  },
-  field: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginBottom: 8,
-  },
-  inputContainer: {
-    position: 'relative',
-  },
-  input: {
-    color: theme.colors.text,
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    fontSize: 16,
-    height: 52,
-  },
-  textArea: {
-    height: 100,
-    paddingTop: 16,
-  },
-  inputFocused: {
-    borderColor: theme.colors.primary,
-    borderWidth: 2,
-  },
-  inputError: {
-    borderColor: theme.colors.error,
-    borderWidth: 2,
-  },
-  errorText: {
-    fontSize: 13,
-    color: theme.colors.error,
-    marginTop: 4,
-    marginLeft: 4,
-  },
-  costContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    paddingHorizontal: 16,
-    height: 52,
-  },
-  currencySymbol: {
-    color: theme.colors.text,
-    fontSize: 18,
-    fontWeight: '600',
-    marginRight: 4,
-  },
-  costInput: {
-    color: theme.colors.text,
-    flex: 1,
-    fontSize: 16,
-    paddingVertical: 0,
-    height: 52,
-    paddingRight: 8,
-  },
-  chevronIcon: {
-    marginLeft: 8,
-  },
-  segmentedControl: {
-    flexDirection: 'row',
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    padding: 4,
-    height: 52,
-  },
-  segmentButton: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-    paddingVertical: 12,
-  },
-  segmentButtonLeft: {
-    marginRight: 2,
-  },
-  segmentButtonRight: {
-    marginLeft: 2,
-  },
-  segmentButtonActive: {
-    backgroundColor: theme.colors.primary,
-  },
-  segmentButtonPressed: {
-    opacity: 0.7,
-  },
-  segmentButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.text,
-  },
-  segmentButtonTextActive: {
-    color: '#FFFFFF',
-  },
-  calculatedCostContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginTop: 24,
-    marginBottom: 16,
-  },
-  calculatedCost: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: theme.colors.text,
-    letterSpacing: -0.5,
-  },
-  calculatedCostSuffix: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: theme.colors.textSecondary,
-    marginLeft: 4,
-  },
-  buttonContainer: {
-    padding: 16,
-    paddingBottom: Platform.OS === 'ios' ? 32 : 16,
-    backgroundColor: theme.colors.background,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-  submitButton: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 50,
-  },
-  submitButtonPressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.98 }],
-  },
-  submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  suggestionsContainer: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    marginTop: 4,
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    maxHeight: 250,
-    zIndex: 1000,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
-  },
-  suggestionsList: {
-    maxHeight: 250,
-  },
-  suggestionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  suggestionItemPressed: {
-    backgroundColor: theme.colors.background,
-  },
-  suggestionItemLast: {
-    borderBottomWidth: 0,
-  },
-  suggestionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  suggestionLogo: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    marginRight: 12,
-    backgroundColor: theme.colors.border,
-  },
-  suggestionText: {
-    fontSize: 16,
-    color: theme.colors.text,
-    fontWeight: '500',
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  dateButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  dateButtonPressed: {
-    opacity: 0.7,
-  },
-  dateButtonText: {
-    fontSize: 16,
-    color: theme.colors.text,
-    fontWeight: '500',
-  },
-  helperText: {
-    fontSize: 13,
-    color: theme.colors.textSecondary,
-    marginTop: 4,
-    marginLeft: 4,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: theme.colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-  submitButtonDisabled: {
-    opacity: 0.6,
-  },
-  submitButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonLoader: {
-    marginRight: 8,
-  },
-    borderBottomColor: theme.colors.border,
-  },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: theme.colors.text,
-  },
-  modalDoneButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-  },
-  modalDoneText: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: theme.colors.primary,
-  },
-  submitButtonDisabled: {
-    opacity: 0.6,
-  },
-  submitButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonLoader: {
-    marginRight: 8,
-  },
-});

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface SummaryCardProps {
   title: string;
@@ -15,6 +15,8 @@ export default function SummaryCard({
   subtitle,
   variant = 'default',
 }: SummaryCardProps) {
+  const { theme } = useTheme();
+  
   const backgroundColor =
     variant === 'primary'
       ? theme.colors.primary
@@ -25,6 +27,25 @@ export default function SummaryCard({
   const textColor = variant !== 'default' ? '#FFFFFF' : theme.colors.text;
   const subtitleColor = variant !== 'default' ? '#FFFFFF' : theme.colors.textSecondary;
 
+  const styles = StyleSheet.create({
+    card: {
+      padding: theme.spacing.md,
+      borderRadius: theme.borderRadius.lg,
+      marginBottom: theme.spacing.md,
+    },
+    title: {
+      ...theme.typography.caption,
+      marginBottom: theme.spacing.xs,
+    },
+    value: {
+      ...theme.typography.h2,
+      marginBottom: theme.spacing.xs,
+    },
+    subtitle: {
+      ...theme.typography.caption,
+    },
+  });
+
   return (
     <View style={[styles.card, { backgroundColor }, theme.shadows.md]}>
       <Text style={[styles.title, { color: subtitleColor }]}>{title}</Text>
@@ -33,23 +54,4 @@ export default function SummaryCard({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    padding: theme.spacing.md,
-    borderRadius: theme.borderRadius.lg,
-    marginBottom: theme.spacing.md,
-  },
-  title: {
-    ...theme.typography.caption,
-    marginBottom: theme.spacing.xs,
-  },
-  value: {
-    ...theme.typography.h2,
-    marginBottom: theme.spacing.xs,
-  },
-  subtitle: {
-    ...theme.typography.caption,
-  },
-});
 

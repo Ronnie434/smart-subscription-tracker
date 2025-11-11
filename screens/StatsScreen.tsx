@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { Subscription } from '../types';
 import { storage } from '../utils/storage';
 import { calculations } from '../utils/calculations';
@@ -33,6 +33,7 @@ type SubscriptionsStackParamList = {
 type StatsScreenNavigationProp = StackNavigationProp<SubscriptionsStackParamList, 'Stats'>;
 
 export default function StatsScreen() {
+  const { theme } = useTheme();
   const navigation = useNavigation<StatsScreenNavigationProp>();
   const { user } = useAuth();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -132,6 +133,82 @@ export default function StatsScreen() {
     const date = parseLocalDate(nextRenewal);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    scrollContent: {
+      paddingHorizontal: theme.spacing.md,
+      paddingTop: theme.spacing.md,
+      paddingBottom: theme.spacing.xxl,
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: theme.spacing.md,
+    },
+    heroSection: {
+      marginBottom: theme.spacing.lg,
+    },
+    section: {
+      marginBottom: theme.spacing.lg,
+    },
+    sectionTitle: {
+      ...theme.typography.h3,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.md,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      gap: theme.spacing.md,
+      marginBottom: theme.spacing.md,
+    },
+    card: {
+      backgroundColor: theme.colors.card,
+      borderRadius: theme.borderRadius.lg,
+      padding: theme.spacing.md,
+      ...theme.shadows.md,
+    },
+    billingRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    billingItem: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    billingValue: {
+      ...theme.typography.h2,
+      color: theme.colors.text,
+      fontWeight: '700',
+      marginBottom: theme.spacing.xs,
+    },
+    billingLabel: {
+      ...theme.typography.body,
+      color: theme.colors.textSecondary,
+    },
+    billingDivider: {
+      width: 1,
+      height: 40,
+      backgroundColor: theme.colors.border,
+    },
+    renewalGroup: {
+      marginBottom: theme.spacing.lg,
+    },
+    renewalGroupTitle: {
+      ...theme.typography.bodyBold,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.md,
+    },
+    emptyText: {
+      ...theme.typography.body,
+      color: theme.colors.textSecondary,
+      textAlign: 'center',
+    },
+  });
 
   if (loading) {
     return <LoadingIndicator />;
@@ -307,79 +384,3 @@ export default function StatsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  scrollContent: {
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.md,
-    paddingBottom: theme.spacing.xxl,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: theme.spacing.md,
-  },
-  heroSection: {
-    marginBottom: theme.spacing.lg,
-  },
-  section: {
-    marginBottom: theme.spacing.lg,
-  },
-  sectionTitle: {
-    ...theme.typography.h3,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.md,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    gap: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-  },
-  card: {
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.md,
-    ...theme.shadows.md,
-  },
-  billingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  billingItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  billingValue: {
-    ...theme.typography.h2,
-    color: theme.colors.text,
-    fontWeight: '700',
-    marginBottom: theme.spacing.xs,
-  },
-  billingLabel: {
-    ...theme.typography.body,
-    color: theme.colors.textSecondary,
-  },
-  billingDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: theme.colors.border,
-  },
-  renewalGroup: {
-    marginBottom: theme.spacing.lg,
-  },
-  renewalGroupTitle: {
-    ...theme.typography.bodyBold,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.md,
-  },
-  emptyText: {
-    ...theme.typography.body,
-    color: theme.colors.textSecondary,
-    textAlign: 'center',
-  },
-});

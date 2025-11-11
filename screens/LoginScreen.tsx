@@ -12,7 +12,7 @@ import {
   Image,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import AuthInput from '../components/AuthInput';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -21,10 +21,11 @@ interface LoginScreenProps {
   onNavigateToForgotPassword: () => void;
 }
 
-export default function LoginScreen({ 
+export default function LoginScreen({
   onNavigateToSignUp,
-  onNavigateToForgotPassword 
+  onNavigateToForgotPassword
 }: LoginScreenProps) {
+  const { theme } = useTheme();
   const { signIn, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -100,6 +101,88 @@ export default function LoginScreen({
   };
 
   const isProcessing = isLoading || authLoading;
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: theme.spacing.xl,
+      paddingTop: 80,
+      paddingBottom: 40,
+    },
+    header: {
+      alignItems: 'center',
+      marginBottom: theme.spacing.xxl,
+    },
+    logoContainer: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: theme.spacing.lg,
+    },
+    logoImage: {
+      width: 96,
+      height: 96,
+      borderRadius: 21.5,
+    },
+    appName: {
+      fontSize: 36,
+      fontWeight: '700',
+      color: theme.colors.text,
+      marginBottom: theme.spacing.xs,
+    },
+    tagline: {
+      fontSize: 16,
+      color: '#8E8E93',
+    },
+    formContainer: {
+      flex: 1,
+      paddingTop: theme.spacing.lg,
+    },
+    forgotPasswordButton: {
+      alignSelf: 'flex-end',
+      marginTop: -theme.spacing.xs,
+      marginBottom: theme.spacing.md,
+      paddingVertical: theme.spacing.xs,
+    },
+    forgotPasswordText: {
+      color: theme.colors.primary,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    signInButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.borderRadius.md,
+      paddingVertical: 16,
+      alignItems: 'center',
+      marginTop: theme.spacing.md,
+    },
+    signInButtonDisabled: {
+      opacity: 0.6,
+    },
+    signInButtonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: theme.spacing.xl,
+    },
+    footerText: {
+      color: theme.colors.text,
+      fontSize: 16,
+    },
+    signUpLink: {
+      color: theme.colors.primary,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+  });
 
   return (
     <KeyboardAvoidingView
@@ -188,85 +271,3 @@ export default function LoginScreen({
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: theme.spacing.xl,
-    paddingTop: 80,
-    paddingBottom: 40,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: theme.spacing.xxl,
-  },
-  logoContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: theme.spacing.lg,
-  },
-  logoImage: {
-    width: 96,
-    height: 96,
-    borderRadius: 21.5,
-  },
-  appName: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
-  },
-  tagline: {
-    fontSize: 16,
-    color: '#8E8E93',
-  },
-  formContainer: {
-    flex: 1,
-    paddingTop: theme.spacing.lg,
-  },
-  forgotPasswordButton: {
-    alignSelf: 'flex-end',
-    marginTop: -theme.spacing.xs,
-    marginBottom: theme.spacing.md,
-    paddingVertical: theme.spacing.xs,
-  },
-  forgotPasswordText: {
-    color: theme.colors.primary,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  signInButton: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.md,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: theme.spacing.md,
-  },
-  signInButtonDisabled: {
-    opacity: 0.6,
-  },
-  signInButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: theme.spacing.xl,
-  },
-  footerText: {
-    color: theme.colors.text,
-    fontSize: 16,
-  },
-  signUpLink: {
-    color: theme.colors.primary,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

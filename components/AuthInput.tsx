@@ -8,7 +8,7 @@ import {
   KeyboardTypeOptions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface AuthInputProps {
   value: string;
@@ -33,11 +33,50 @@ export default function AuthInput({
   autoComplete = 'off',
   editable = true,
 }: AuthInputProps) {
+  const { theme } = useTheme();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
   const isPassword = secureTextEntry;
   const actualSecureTextEntry = isPassword && !isPasswordVisible;
+
+  const styles = StyleSheet.create({
+    container: {
+      marginBottom: theme.spacing.md,
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#1C1C1E',
+      borderRadius: theme.borderRadius.md,
+      borderWidth: 1,
+      borderColor: 'transparent',
+      paddingHorizontal: theme.spacing.md,
+      height: 52,
+    },
+    inputContainerFocused: {
+      borderColor: theme.colors.primary,
+    },
+    inputContainerError: {
+      borderColor: theme.colors.error,
+    },
+    input: {
+      flex: 1,
+      fontSize: 16,
+      color: theme.colors.text,
+      paddingVertical: 0,
+    },
+    eyeIcon: {
+      padding: theme.spacing.xs,
+      marginLeft: theme.spacing.xs,
+    },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 14,
+      marginTop: theme.spacing.xs,
+      marginLeft: theme.spacing.xs,
+    },
+  });
 
   return (
     <View style={styles.container}>
@@ -79,41 +118,3 @@ export default function AuthInput({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: theme.spacing.md,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1C1C1E',
-    borderRadius: theme.borderRadius.md,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    paddingHorizontal: theme.spacing.md,
-    height: 52,
-  },
-  inputContainerFocused: {
-    borderColor: theme.colors.primary,
-  },
-  inputContainerError: {
-    borderColor: theme.colors.error,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: theme.colors.text,
-    paddingVertical: 0,
-  },
-  eyeIcon: {
-    padding: theme.spacing.xs,
-    marginLeft: theme.spacing.xs,
-  },
-  errorText: {
-    color: theme.colors.error,
-    fontSize: 14,
-    marginTop: theme.spacing.xs,
-    marginLeft: theme.spacing.xs,
-  },
-});

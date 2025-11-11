@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, ActivityIndicator } from 'react-native';
-import { theme } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { Subscription } from '../types';
 import { hasSeenOnboarding } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
@@ -76,6 +76,8 @@ function AuthNavigator() {
 }
 
 function SubscriptionsNavigator() {
+  const { theme } = useTheme();
+  
   return (
     <SubscriptionsStack.Navigator
       screenOptions={{
@@ -124,6 +126,8 @@ function SubscriptionsNavigator() {
 }
 
 function StatsNavigator() {
+  const { theme } = useTheme();
+  
   return (
     <StatsStack.Navigator
       screenOptions={{
@@ -156,6 +160,8 @@ function StatsNavigator() {
 }
 
 function SettingsNavigator() {
+  const { theme } = useTheme();
+  
   return (
     <SettingsStack.Navigator
       screenOptions={{
@@ -188,6 +194,7 @@ function SettingsNavigator() {
 }
 
 export default function AppNavigator() {
+  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { user, loading: authLoading } = useAuth();
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
@@ -260,10 +267,10 @@ export default function AppNavigator() {
 
             return <Ionicons name={iconName} size={size} color={color} />;
           },
-          tabBarActiveTintColor: '#FFFFFF',
-          tabBarInactiveTintColor: '#8E8E93',
+          tabBarActiveTintColor: theme.colors.primary,
+          tabBarInactiveTintColor: theme.colors.textSecondary,
           tabBarStyle: {
-            backgroundColor: '#000000',
+            backgroundColor: theme.colors.card,
             borderTopWidth: 1,
             borderTopColor: theme.colors.border,
             paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
