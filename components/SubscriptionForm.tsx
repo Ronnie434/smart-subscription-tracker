@@ -38,7 +38,7 @@ const CATEGORIES = [
 
 export default function SubscriptionForm({ subscription, onSubmit, onCancel, isSubmitting = false }: SubscriptionFormProps) {
   const [name, setName] = useState(subscription?.name || '');
-  const [cost, setCost] = useState(subscription?.cost?.toString() || '');
+  const [cost, setCost] = useState(subscription?.cost ? subscription.cost.toFixed(2) : '');
   const [description, setDescription] = useState(subscription?.description || '');
   const [billingFrequency, setBillingFrequency] = useState<BillingCycle>(subscription?.billingCycle || 'monthly');
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -78,7 +78,7 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
   useEffect(() => {
     if (subscription) {
       setName(subscription.name);
-      setCost(subscription.cost.toString());
+      setCost(subscription.cost.toFixed(2));
       setDescription(subscription.description || '');
       setBillingFrequency(subscription.billingCycle);
     }
@@ -198,11 +198,6 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
         <View style={styles.form}>
-          {/* Title */}
-          <Text style={styles.title}>
-            {subscription ? 'Edit Subscription' : 'Add Subscription'}
-          </Text>
-
           {/* Name Field with Autocomplete */}
           <View style={styles.field}>
             <Text style={styles.label}>Name</Text>
@@ -307,8 +302,12 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
                 onFocus={() => setFocusedField('cost')}
                 onBlur={() => {
                   setFocusedField(null);
+                  // Always format to 2 decimal places, or set to empty if invalid
                   if (cost && !isNaN(parseFloat(cost))) {
                     setCost(formatCurrency(cost));
+                  } else if (cost && cost.trim() !== '') {
+                    // If there's text but it's not a valid number, clear it
+                    setCost('');
                   }
                 }}
                 placeholder="0.00"

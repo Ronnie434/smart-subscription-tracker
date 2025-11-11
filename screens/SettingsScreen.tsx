@@ -1,15 +1,74 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Modal, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../constants/theme';
 import { useAuth } from '../contexts/AuthContext';
+
+// Available user icon options
+const USER_ICONS = [
+  { name: 'person', label: 'Person' },
+  { name: 'person-circle', label: 'Circle' },
+  { name: 'happy', label: 'Happy' },
+  { name: 'star', label: 'Star' },
+  { name: 'heart', label: 'Heart' },
+  { name: 'rocket', label: 'Rocket' },
+  { name: 'bulb', label: 'Bulb' },
+  { name: 'trophy', label: 'Trophy' },
+  { name: 'leaf', label: 'Leaf' },
+  { name: 'flame', label: 'Flame' },
+  { name: 'sunny', label: 'Sunny' },
+  { name: 'moon', label: 'Moon' },
+] as const;
+
+const ICON_STORAGE_KEY = '@user_icon_preference';
 
 export default function SettingsScreen() {
   const { user, signOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedIcon, setSelectedIcon] = useState<string>('person');
+  const [showIconPicker, setShowIconPicker] = useState(false);
+
+  // Load saved icon preference
+  useEffect(() => {
+    loadIconPreference();
+  }, []);
+
+  const loadIconPreference = async () => {
+    try {
+      const savedIcon = await AsyncStorage.getItem(ICON_STORAGE_KEY);
+      if (savedIcon) {
+        setSelectedIcon(savedIcon);
+      }
+    } catch (error) {
+      console.error('Error loading icon preference:', error);
+    }
+  };
+
+  const handleIconSelect = async (iconName: string) => {
+    try {
+      await AsyncStorage.setItem(ICON_STORAGE_KEY, iconName);
+      setSelectedIcon(iconName);
+      setShowIconPicker(false);
+      
+      if (Platform.OS === 'ios') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch (error) {
+      console.error('Error saving icon preference:', error);
+      Alert.alert('Error', 'Failed to save icon preference. Please try again.');
+    }
+  };
+
+  const handleAvatarPress = () => {
+    if (Platform.OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setShowIconPicker(true);
+  };
 
   const handleSignOut = () => {
     Alert.alert(
@@ -50,17 +109,22 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>Account</Text>
           
           {/* User Info Card */}
-          <View style={styles.card}>
+          <TouchableOpacity 
+            style={styles.card} 
+            onPress={handleAvatarPress}
+            activeOpacity={0.8}>
             <View style={styles.userInfoRow}>
               <View style={styles.avatarContainer}>
-                <Ionicons name="person" size={24} color={theme.colors.primary} />
+                <Ionicons name={selectedIcon as any} size={24} color={theme.colors.primary} />
               </View>
               <View style={styles.userInfo}>
                 <Text style={styles.userName}>{user?.user_metadata?.name || 'User'}</Text>
                 <Text style={styles.userEmail}>{user?.email}</Text>
               </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
             </View>
-          </View>
+            <Text style={styles.tapToChangeText}>Tap to change icon</Text>
+          </TouchableOpacity>
 
           {/* Sign Out Button */}
           <TouchableOpacity
@@ -100,6 +164,63 @@ export default function SettingsScreen() {
           <Text style={styles.footerText}>Made with ❤️ for subscription management</Text>
         </View>
       </ScrollView>
+
+      {/* Icon Picker Modal */}
+      <Modal
+        visible={showIconPicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowIconPicker(false)}>
+        <View style={styles.modalOverlay}>
+          <Pressable 
+            style={styles.modalBackdrop} 
+            onPress={() => setShowIconPicker(false)} 
+          />
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Choose Your Icon</Text>
+              <TouchableOpacity
+                onPress={() => setShowIconPicker(false)}
+                style={styles.modalCloseButton}>
+                <Ionicons name="close" size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView 
+              style={styles.iconGrid}
+              contentContainerStyle={styles.iconGridContent}
+              showsVerticalScrollIndicator={false}>
+              {USER_ICONS.map((icon) => (
+                <TouchableOpacity
+                  key={icon.name}
+                  style={[
+                    styles.iconOption,
+                    selectedIcon === icon.name && styles.iconOptionSelected,
+                  ]}
+                  onPress={() => handleIconSelect(icon.name)}
+                  activeOpacity={0.7}>
+                  <View style={[
+                    styles.iconCircle,
+                    selectedIcon === icon.name && styles.iconCircleSelected,
+                  ]}>
+                    <Ionicons 
+                      name={icon.name as any} 
+                      size={32} 
+                      color={selectedIcon === icon.name ? '#FFFFFF' : theme.colors.primary} 
+                    />
+                  </View>
+                  <Text style={[
+                    styles.iconLabel,
+                    selectedIcon === icon.name && styles.iconLabelSelected,
+                  ]}>
+                    {icon.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -163,6 +284,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textSecondary,
   },
+  tapToChangeText: {
+    fontSize: 12,
+    color: theme.colors.textSecondary,
+    marginTop: 8,
+    textAlign: 'center',
+  },
   signOutButton: {
     backgroundColor: theme.colors.error,
     borderRadius: theme.borderRadius.md,
@@ -208,5 +335,82 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textSecondary,
     textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: theme.colors.surface,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+    maxHeight: '70%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: theme.colors.text,
+  },
+  modalCloseButton: {
+    padding: 4,
+  },
+  iconGrid: {
+    maxHeight: 400,
+  },
+  iconGridContent: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: 8,
+  },
+  iconOption: {
+    width: '33.33%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+    paddingVertical: 16,
+  },
+  iconOptionSelected: {
+    backgroundColor: `${theme.colors.primary}10`,
+    borderRadius: 12,
+  },
+  iconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: `${theme.colors.primary}20`,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  iconCircleSelected: {
+    backgroundColor: theme.colors.primary,
+  },
+  iconLabel: {
+    fontSize: 12,
+    color: theme.colors.text,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  iconLabelSelected: {
+    color: theme.colors.primary,
+    fontWeight: '600',
   },
 });
