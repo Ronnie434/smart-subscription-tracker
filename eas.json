@@ -9,22 +9,12 @@
       "distribution": "internal",
       "env": {
         "APP_ENV": "development"
-      },
-      "hooks": {
-        "pre-build": "npm ci"
       }
     },
     "ios-simulator": {
       "extends": "development",
       "ios": {
         "simulator": true
-      },
-      "env": {
-        "APP_ENV": "development",
-        "NODE_OPTIONS": "--max_old_space_size=4096"
-      },
-      "hooks": {
-        "pre-build": "npm ci"
       }
     },
     "preview": {
@@ -34,11 +24,7 @@
         "buildConfiguration": "Release"
       },
       "env": {
-        "APP_ENV": "preview",
-        "NODE_OPTIONS": "--max_old_space_size=4096"
-      },
-      "hooks": {
-        "pre-build": "npm ci"
+        "APP_ENV": "preview"
       },
       "channel": "preview"
     },
@@ -54,11 +40,7 @@
         "autoIncrement": true
       },
       "env": {
-        "APP_ENV": "production",
-        "NODE_OPTIONS": "--max_old_space_size=4096"
-      },
-      "hooks": {
-        "pre-build": "npm ci"
+        "APP_ENV": "production"
       },
       "channel": "production"
     }
