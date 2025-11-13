@@ -16,6 +16,7 @@ import { dateHelpers } from '../utils/dateHelpers';
 import { calculations } from '../utils/calculations';
 import { Subscription } from '../types';
 import * as Haptics from 'expo-haptics';
+import { LogoSource, getNextLogoSource, getLogoUrlForSource } from '../utils/logoHelpers';
 
 // Type definitions for navigation
 type SubscriptionsStackParamList = {
@@ -44,7 +45,7 @@ export default function EditSubscriptionScreen() {
   const { subscription: initialSubscription } = route.params;
   const [subscription, setSubscription] = useState(initialSubscription);
   const [loading, setLoading] = useState(false);
-  const [logoError, setLogoError] = useState(false);
+  const [logoSource, setLogoSource] = useState<LogoSource>('primary');
 
   // Refresh subscription data when screen comes into focus
   useEffect(() => {
@@ -107,23 +108,28 @@ export default function EditSubscriptionScreen() {
     navigation.navigate('AddSubscription', { subscription });
   };
 
+  // Handle logo error and try fallback sources
+  const handleLogoError = () => {
+    setLogoSource(currentSource => getNextLogoSource(currentSource));
+  };
+
   // Render either logo or fallback icon
   const renderIcon = () => {
-    if (subscription.domain && !logoError) {
+    const logoUrl = subscription.domain ? getLogoUrlForSource(subscription.domain, logoSource, 64) : '';
+    
+    if (subscription.domain && logoUrl) {
       return (
         <View style={styles.logoContainer}>
           <Image
-            source={{
-              uri: `https://logo.clearbit.com/${subscription.domain}`
-            }}
+            source={{ uri: logoUrl }}
             style={styles.logoImage}
-            onError={() => setLogoError(true)}
+            onError={handleLogoError}
           />
         </View>
       );
     }
 
-    // Fallback to letter-based icon
+    // Fallback to letter-based icon when no domain or all sources failed
     return (
       <View style={[styles.iconContainer, { backgroundColor: getIconColor() }]}>
         <Text style={styles.iconText}>{getIconLetter()}</Text>

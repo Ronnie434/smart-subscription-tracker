@@ -4,6 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Subscription } from '../types';
 import { calculations } from '../utils/calculations';
 import AnimatedPressable from './AnimatedPressable';
+import { getLogoUrlForSource, getNextLogoSource, LogoSource } from '../utils/logoHelpers';
 
 interface SubscriptionCardProps {
   subscription: Subscription;
@@ -31,7 +32,7 @@ const SubscriptionCard = memo(function SubscriptionCard({
   onLongPress,
 }: SubscriptionCardProps) {
   const { theme } = useTheme();
-  const [logoError, setLogoError] = useState(false);
+  const [logoSource, setLogoSource] = useState<LogoSource>('primary');
   const monthlyCost = calculations.getMonthlyCost(subscription);
 
   // Get service icon color based on service name
@@ -142,9 +143,17 @@ const SubscriptionCard = memo(function SubscriptionCard({
     },
   });
 
+  // Handle logo error and try fallback sources
+  const handleLogoError = () => {
+    const nextSource = getNextLogoSource(logoSource);
+    setLogoSource(nextSource);
+  };
+
   // Render either logo or fallback icon
   const renderIcon = () => {
-    if (subscription.domain && !logoError) {
+    const logoUrl = subscription.domain ? getLogoUrlForSource(subscription.domain, logoSource, 64) : '';
+    
+    if (subscription.domain && logoUrl) {
       return (
         <AnimatedPressable
           onPress={(e: any) => {
@@ -154,17 +163,15 @@ const SubscriptionCard = memo(function SubscriptionCard({
           style={styles.logoContainer}
           scaleOnPress={0.92}>
           <Image
-            source={{
-              uri: `https://logo.clearbit.com/${subscription.domain}`
-            }}
+            source={{ uri: logoUrl }}
             style={styles.logoImage}
-            onError={() => setLogoError(true)}
+            onError={handleLogoError}
           />
         </AnimatedPressable>
       );
     }
 
-    // Fallback to letter-based icon
+    // Fallback to letter-based icon when no domain or all sources failed
     return (
       <View style={[styles.iconContainer, { backgroundColor: getIconColor() }]}>
         <Text style={styles.iconText}>{getIconLetter()}</Text>

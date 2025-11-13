@@ -289,6 +289,12 @@ export default function AppNavigator() {
           options={{
             tabBarLabel: 'Subscriptions',
           }}
+          listeners={({ navigation }) => ({
+            tabPress: (e) => {
+              // Reset to Home screen when tab is pressed
+              navigation.navigate('Subscriptions', { screen: 'Home' });
+            },
+          })}
         />
         <Tab.Screen
           name="Stats"

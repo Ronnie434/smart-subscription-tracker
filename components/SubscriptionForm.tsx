@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { Subscription, BillingCycle } from '../types';
 import { extractDomain, getCompanyNames } from '../utils/domainHelpers';
+import { getLogoUrlForSource, getNextLogoSource, LogoSource } from '../utils/logoHelpers';
 import * as Haptics from 'expo-haptics';
 
 interface SubscriptionFormProps {
@@ -46,6 +47,7 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [logoSources, setLogoSources] = useState<Map<string, LogoSource>>(new Map());
   const nameInputRef = useRef<TextInput>(null);
   // Helper to parse date string without timezone offset
   const parseDateWithoutTimezone = (dateStr: string): Date => {
@@ -161,6 +163,13 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
 
     setSuggestions(filtered);
     setShowSuggestions(filtered.length > 0);
+  };
+
+  // Handle logo error for suggestions and try fallback sources
+  const handleSuggestionLogoError = (suggestion: string) => {
+    const currentSource = logoSources.get(suggestion) || 'primary';
+    const nextSource = getNextLogoSource(currentSource);
+    setLogoSources(new Map(logoSources.set(suggestion, nextSource)));
   };
 
   // Handle selecting a suggestion
@@ -544,7 +553,8 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
                     nestedScrollEnabled={true}>
                     {suggestions.map((suggestion, index) => {
                       const domain = extractDomain(suggestion);
-                      const logoUrl = domain ? `https://logo.clearbit.com/${domain}` : null;
+                      const logoSource = logoSources.get(suggestion) || 'primary';
+                      const logoUrl = domain ? getLogoUrlForSource(domain, logoSource, 64) : null;
                       
                       return (
                         <Pressable
@@ -560,6 +570,7 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
                               <Image
                                 source={{ uri: logoUrl }}
                                 style={styles.suggestionLogo}
+                                onError={() => handleSuggestionLogoError(suggestion)}
                               />
                             )}
                             <Text style={styles.suggestionText}>{suggestion}</Text>
