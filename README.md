@@ -9,15 +9,19 @@ A modern, cloud-enabled subscription tracking app built with React Native, Expo,
 - **Monthly Summary**: View total monthly costs and breakdown by category
 - **Renewal Reminders**: Get notified when subscriptions are about to renew
 - **Export Reports**: Export your subscription data as CSV files
+- **Statistics Dashboard**: Detailed analytics with category breakdown, spending insights, and renewal timeline
+- **Theme Customization**: Light, Dark, and Auto modes with system theme detection
+- **Onboarding**: Interactive tutorial for new users
+- **User Profiles**: Customizable avatars and account management
 - **Modern UI**: Clean, intuitive interface with smooth animations
 - **Haptic Feedback**: Enhanced user experience with haptic feedback
 
 ### Backend & Sync (NEW! 🎉)
 - **Cloud Storage**: Your data is securely stored in Supabase
-- **User Authentication**: Secure login with email/password or Google OAuth
+- **User Authentication**: Secure login with email/password authentication
 - **Multi-Device Sync**: Access your subscriptions from any device
 - **Data Isolation**: Each user's data is completely private and secure
-- **Offline Support**: Works offline, syncs when connection is restored
+- **Local Caching**: Data cached locally with cloud synchronization when online
 - **Real-time Updates**: Changes sync instantly across your devices
 
 ## Getting Started
@@ -100,6 +104,10 @@ Or scan the QR code with the Expo Go app on your device.
 - **Expo Auth Session**: OAuth authentication flows
 - **Expo Sharing**: File sharing functionality
 - **Expo Haptics**: Haptic feedback
+- **expo-notifications**: Renewal reminder notifications
+- **expo-file-system**: CSV file generation
+- **react-native-reanimated**: Smooth UI animations
+- **@react-native-community/datetimepicker**: Date selection
 
 ## Usage
 
@@ -117,6 +125,18 @@ Or scan the QR code with the Expo Go app on your device.
 - Software
 - News
 - Other
+
+## 🚀 Future Features
+
+Features planned for future releases:
+
+- **Google OAuth**: Social login with Google authentication
+- **Full Offline Support**: Offline-first architecture with automatic sync queue
+- **Budget Alerts**: Get notified when spending exceeds set limits
+- **Subscription Sharing**: Family plan tracking and cost splitting
+- **Payment Method Tracking**: Track which card/account is used for each subscription
+- **Price History**: Track subscription price changes over time
+
 ## 📚 Documentation
 
 - **[Quick Start Guide](QUICK_START.md)** - Get up and running in 10 minutes
@@ -126,10 +146,11 @@ Or scan the QR code with the Expo Go app on your device.
 ## 🚀 Development Roadmap
 
 - ✅ **Phase 1**: Foundation Setup - Backend infrastructure and dependencies
-- 🔄 **Phase 2**: Authentication Implementation - Login, signup, Google OAuth
-- ⏳ **Phase 3**: Data Migration & CRUD - Sync local data to cloud
-- ⏳ **Phase 4**: Real-time Sync - Live updates across devices
-- ⏳ **Phase 5**: Testing & Polish - End-to-end testing and optimization
+- ✅ **Phase 2**: Authentication Implementation - Email/password login and signup
+- ✅ **Phase 3**: Data Migration & CRUD - Sync local data to cloud
+- ✅ **Phase 4**: Real-time Sync - Live updates across devices
+- ✅ **Phase 5**: Advanced Features - Statistics, themes, and onboarding
+- ⏳ **Phase 6**: Testing & Polish - Comprehensive testing and optimization
 
 ## 🤝 Contributing
 
