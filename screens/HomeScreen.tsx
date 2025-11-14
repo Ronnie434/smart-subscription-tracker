@@ -230,17 +230,20 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       backgroundColor: theme.colors.card,
       marginTop: 16,
       marginBottom: 12,
+      marginHorizontal: 16,
       borderRadius: 16,
-      padding: 20,
+      padding: 16,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
       ...Platform.select({
         ios: {
-          shadowColor: theme.colors.shadow,
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: theme.isDark ? 0.3 : 0.08,
-          shadowRadius: 8,
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 4,
         },
         android: {
-          elevation: 3,
+          elevation: 2,
         },
       }),
     },
@@ -256,8 +259,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       fontSize: 48,
       fontWeight: '700',
       color: theme.colors.text,
-      marginBottom: 12,
+      marginBottom: 8,
       letterSpacing: -1,
+      lineHeight: 56,
     },
     statsRow: {
       flexDirection: 'row',
@@ -273,21 +277,24 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       fontSize: 13,
       fontWeight: '600',
       color: theme.colors.text,
+      lineHeight: 18,
     },
     sectionHeader: {
       paddingHorizontal: 16,
-      paddingTop: 16,
-      paddingBottom: 12,
+      paddingTop: 20,
+      paddingBottom: 8,
     },
     sectionTitle: {
-      fontSize: 17,
+      fontSize: 13,
       fontWeight: '600',
-      color: theme.colors.text,
-      letterSpacing: -0.2,
+      color: theme.colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
     listContainer: {
       paddingHorizontal: 16,
       paddingBottom: 24,
+      paddingTop: 0,
     },
     emptyContainer: {
       flex: 1,
@@ -334,7 +341,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
           <Animated.View
-            entering={FadeInDown.delay(index * 50).springify()}>
+            entering={FadeInDown.delay(index * 50).springify()}
+            style={{ marginBottom: index < subscriptions.length - 1 ? 12 : 0 }}>
             <SubscriptionCard
               subscription={item}
               onPress={() => handleEdit(item)}

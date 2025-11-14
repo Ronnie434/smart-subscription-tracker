@@ -36,16 +36,18 @@ export default function RenewalItem({ subscription, onPress }: RenewalItemProps)
   const styles = StyleSheet.create({
     container: {
       backgroundColor: theme.colors.card,
-      borderRadius: 12,
+      borderRadius: 16,
       padding: 16,
       marginHorizontal: 16,
-      marginBottom: 12,
+      marginBottom: 0,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
       ...Platform.select({
         ios: {
-          shadowColor: theme.colors.shadow,
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: theme.isDark ? 0.3 : 0.06,
-          shadowRadius: 8,
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 4,
         },
         android: {
           elevation: 2,
@@ -67,12 +69,14 @@ export default function RenewalItem({ subscription, onPress }: RenewalItemProps)
       color: theme.colors.text,
       flex: 1,
       letterSpacing: -0.2,
+      lineHeight: 22,
     },
     cost: {
       fontSize: 17,
       fontWeight: '700',
       color: theme.colors.primary,
       marginLeft: 12,
+      lineHeight: 22,
     },
     footer: {
       flexDirection: 'row',
@@ -81,11 +85,14 @@ export default function RenewalItem({ subscription, onPress }: RenewalItemProps)
     },
     date: {
       fontSize: 14,
+      fontWeight: '400',
       color: theme.colors.textSecondary,
+      lineHeight: 18,
     },
     daysUntil: {
       fontSize: 14,
       fontWeight: '600',
+      lineHeight: 18,
     },
   });
 

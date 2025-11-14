@@ -293,10 +293,13 @@ export default function SignUpScreen({ onNavigateToSignIn }: SignUpScreenProps) 
       fontWeight: '700',
       color: theme.colors.text,
       marginBottom: theme.spacing.xs,
+      lineHeight: 44,
     },
     tagline: {
       fontSize: 16,
+      fontWeight: '400',
       color: theme.colors.textSecondary,
+      lineHeight: 22,
     },
     formContainer: {
       flex: 1,
@@ -321,13 +324,25 @@ export default function SignUpScreen({ onNavigateToSignIn }: SignUpScreenProps) 
     strengthText: {
       fontSize: 12,
       fontWeight: '600',
+      lineHeight: 16,
     },
     createButton: {
       backgroundColor: theme.colors.primary,
-      borderRadius: theme.borderRadius.md,
+      borderRadius: 26,
       paddingVertical: 16,
       alignItems: 'center',
       marginTop: theme.spacing.md,
+      ...Platform.select({
+        ios: {
+          shadowColor: theme.colors.primary,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
     },
     createButtonDisabled: {
       opacity: 0.6,
@@ -335,7 +350,7 @@ export default function SignUpScreen({ onNavigateToSignIn }: SignUpScreenProps) 
     createButtonText: {
       color: '#FFFFFF',
       fontSize: 16,
-      fontWeight: '600',
+      fontWeight: '700',
     },
     footer: {
       flexDirection: 'row',

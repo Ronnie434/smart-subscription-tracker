@@ -143,19 +143,34 @@ export default function ForgotPasswordScreen({ onNavigateToSignIn }: ForgotPassw
       width: 80,
       height: 80,
       borderRadius: 40,
-      backgroundColor: theme.colors.surface,
+      backgroundColor: theme.colors.card,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: theme.spacing.lg,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 2,
+        },
+      }),
     },
     title: {
       fontSize: 32,
       fontWeight: '700',
       color: theme.colors.text,
       marginBottom: theme.spacing.md,
+      lineHeight: 40,
     },
     subtitle: {
       fontSize: 16,
+      fontWeight: '400',
       color: theme.colors.textSecondary,
       lineHeight: 24,
       marginBottom: theme.spacing.xxl,
@@ -165,10 +180,21 @@ export default function ForgotPasswordScreen({ onNavigateToSignIn }: ForgotPassw
     },
     sendButton: {
       backgroundColor: theme.colors.primary,
-      borderRadius: theme.borderRadius.md,
+      borderRadius: 26,
       paddingVertical: 16,
       alignItems: 'center',
       marginTop: theme.spacing.md,
+      ...Platform.select({
+        ios: {
+          shadowColor: theme.colors.primary,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
     },
     sendButtonDisabled: {
       opacity: 0.6,
@@ -176,7 +202,7 @@ export default function ForgotPasswordScreen({ onNavigateToSignIn }: ForgotPassw
     sendButtonText: {
       color: '#FFFFFF',
       fontSize: 16,
-      fontWeight: '600',
+      fontWeight: '700',
     },
     footer: {
       flexDirection: 'row',
@@ -203,10 +229,23 @@ export default function ForgotPasswordScreen({ onNavigateToSignIn }: ForgotPassw
       width: 120,
       height: 120,
       borderRadius: 60,
-      backgroundColor: theme.colors.surface,
+      backgroundColor: theme.colors.card,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: theme.spacing.xl,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 6,
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
     },
     successTitle: {
       fontSize: 28,
@@ -214,9 +253,11 @@ export default function ForgotPasswordScreen({ onNavigateToSignIn }: ForgotPassw
       color: theme.colors.text,
       marginBottom: theme.spacing.md,
       textAlign: 'center',
+      lineHeight: 34,
     },
     successMessage: {
       fontSize: 16,
+      fontWeight: '400',
       color: theme.colors.textSecondary,
       textAlign: 'center',
       lineHeight: 24,
@@ -228,23 +269,36 @@ export default function ForgotPasswordScreen({ onNavigateToSignIn }: ForgotPassw
     },
     successSubtext: {
       fontSize: 14,
+      fontWeight: '400',
       color: theme.colors.textSecondary,
       textAlign: 'center',
       lineHeight: 20,
       marginBottom: theme.spacing.xxl,
       paddingHorizontal: theme.spacing.md,
+      opacity: 0.8,
     },
     backButton: {
       backgroundColor: theme.colors.primary,
-      borderRadius: theme.borderRadius.md,
+      borderRadius: 26,
       paddingVertical: 16,
       paddingHorizontal: 48,
       alignItems: 'center',
+      ...Platform.select({
+        ios: {
+          shadowColor: theme.colors.primary,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
     },
     backButtonText: {
       color: '#FFFFFF',
       fontSize: 16,
-      fontWeight: '600',
+      fontWeight: '700',
     },
   });
 

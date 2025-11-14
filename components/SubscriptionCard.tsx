@@ -75,15 +75,17 @@ const SubscriptionCard = memo(function SubscriptionCard({
   const styles = StyleSheet.create({
     card: {
       backgroundColor: theme.colors.card,
-      borderRadius: 12,
+      borderRadius: 16,
       padding: 16,
-      marginBottom: 12,
+      marginBottom: 0,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
       ...Platform.select({
         ios: {
-          shadowColor: theme.colors.shadow,
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: theme.isDark ? 0.3 : 0.06,
-          shadowRadius: 8,
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 4,
         },
         android: {
           elevation: 2,
@@ -100,6 +102,7 @@ const SubscriptionCard = memo(function SubscriptionCard({
       borderRadius: 12,
       justifyContent: 'center',
       alignItems: 'center',
+      overflow: 'hidden',
     },
     logoContainer: {
       width: 48,
@@ -126,6 +129,7 @@ const SubscriptionCard = memo(function SubscriptionCard({
       color: theme.colors.text,
       marginBottom: 4,
       letterSpacing: -0.2,
+      lineHeight: 22,
     },
     priceContainer: {
       flexDirection: 'row',
@@ -135,11 +139,14 @@ const SubscriptionCard = memo(function SubscriptionCard({
       fontSize: 15,
       fontWeight: '600',
       color: theme.colors.textSecondary,
+      lineHeight: 20,
     },
     priceLabel: {
       fontSize: 13,
+      fontWeight: '400',
       color: theme.colors.textSecondary,
       marginLeft: 2,
+      lineHeight: 18,
     },
   });
 

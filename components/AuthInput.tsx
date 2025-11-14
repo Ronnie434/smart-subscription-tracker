@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   KeyboardTypeOptions,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
@@ -48,18 +49,38 @@ export default function AuthInput({
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: theme.colors.card,
-      borderRadius: theme.borderRadius.md,
-      borderWidth: 1,
+      borderRadius: 16,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: theme.colors.border,
       paddingHorizontal: theme.spacing.md,
       height: 52,
-      ...theme.shadows.sm,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 1,
+        },
+      }),
     },
     inputContainerFocused: {
       borderColor: theme.colors.primary,
+      borderWidth: 2,
+      ...Platform.select({
+        ios: {
+          shadowColor: theme.colors.primary,
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+        },
+      }),
     },
     inputContainerError: {
       borderColor: theme.colors.error,
+      borderWidth: 2,
     },
     input: {
       flex: 1,
@@ -73,9 +94,11 @@ export default function AuthInput({
     },
     errorText: {
       color: theme.colors.error,
-      fontSize: 14,
-      marginTop: theme.spacing.xs,
-      marginLeft: theme.spacing.xs,
+      fontSize: 12,
+      fontWeight: '500',
+      marginTop: 6,
+      marginLeft: 4,
+      lineHeight: 16,
     },
   });
 

@@ -7,6 +7,7 @@ import {
   Dimensions,
   TouchableOpacity,
   ViewToken,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
@@ -88,14 +89,16 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     },
     title: {
       fontSize: 32,
-      fontWeight: 'bold',
+      fontWeight: '700',
       color: theme.colors.text,
       textAlign: 'center',
       marginTop: theme.spacing.xxl,
       marginBottom: theme.spacing.md,
+      lineHeight: 40,
     },
     subtitle: {
       fontSize: 18,
+      fontWeight: '400',
       color: theme.colors.textSecondary,
       textAlign: 'center',
       lineHeight: 26,
@@ -124,13 +127,24 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     button: {
       backgroundColor: theme.colors.primary,
       paddingVertical: 16,
-      borderRadius: theme.borderRadius.md,
+      borderRadius: 26,
       alignItems: 'center',
+      ...Platform.select({
+        ios: {
+          shadowColor: theme.colors.primary,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
     },
     buttonText: {
       color: '#FFFFFF',
       fontSize: 16,
-      fontWeight: '600',
+      fontWeight: '700',
     },
   });
 

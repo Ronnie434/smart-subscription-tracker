@@ -151,8 +151,8 @@ export default function EditSubscriptionScreen() {
     },
     contentContainer: {
       flex: 1,
-      paddingHorizontal: 24,
-      paddingTop: 32,
+      paddingHorizontal: 16,
+      paddingTop: 24,
       alignItems: 'center',
     },
     iconContainer: {
@@ -161,6 +161,7 @@ export default function EditSubscriptionScreen() {
       borderRadius: 30,
       justifyContent: 'center',
       alignItems: 'center',
+      overflow: 'hidden',
     },
     logoContainer: {
       width: 60,
@@ -182,25 +183,33 @@ export default function EditSubscriptionScreen() {
       color: theme.colors.text,
       marginTop: 16,
       textAlign: 'center',
+      lineHeight: 30,
     },
     price: {
       fontSize: 20,
+      fontWeight: '600',
       color: theme.colors.text,
       marginTop: 8,
       textAlign: 'center',
+      lineHeight: 26,
     },
     renewalSection: {
       marginTop: 24,
       alignItems: 'center',
     },
     renewalLabel: {
-      fontSize: 15,
+      fontSize: 13,
+      fontWeight: '500',
       color: '#8E8E93',
       marginBottom: 4,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
     renewalDate: {
       fontSize: 17,
+      fontWeight: '600',
       color: theme.colors.text,
+      lineHeight: 22,
     },
     editButton: {
       paddingHorizontal: 16,

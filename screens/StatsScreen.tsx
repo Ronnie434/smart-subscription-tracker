@@ -138,7 +138,7 @@ export default function StatsScreen() {
       backgroundColor: theme.colors.background,
     },
     scrollContent: {
-      paddingBottom: 32,
+      paddingBottom: 24,
     },
     emptyContainer: {
       flex: 1,
@@ -147,22 +147,24 @@ export default function StatsScreen() {
       padding: 16,
     },
     
-    // Card styles matching HomeScreen
+    // Card styles matching Settings screen
     card: {
       backgroundColor: theme.colors.card,
       marginHorizontal: 16,
-      marginBottom: 12,
+      marginBottom: 0,
       borderRadius: 16,
-      padding: 20,
+      padding: 16,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
       ...Platform.select({
         ios: {
-          shadowColor: theme.colors.shadow,
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: theme.isDark ? 0.3 : 0.08,
-          shadowRadius: 8,
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 4,
         },
         android: {
-          elevation: 3,
+          elevation: 2,
         },
       }),
     },
@@ -172,19 +174,21 @@ export default function StatsScreen() {
       color: theme.colors.textSecondary,
       textTransform: 'uppercase',
       letterSpacing: 0.5,
-      marginBottom: 12,
+      marginBottom: 8,
     },
     largeValue: {
       fontSize: 48,
       fontWeight: '700',
       color: theme.colors.text,
-      marginBottom: 8,
+      marginBottom: 6,
       letterSpacing: -1,
+      lineHeight: 56,
     },
     subtitle: {
       fontSize: 15,
-      fontWeight: '500',
+      fontWeight: '400',
       color: theme.colors.textSecondary,
+      lineHeight: 20,
     },
     
     // Stats grid
@@ -192,19 +196,21 @@ export default function StatsScreen() {
       flexDirection: 'row',
       gap: 12,
       marginHorizontal: 16,
-      marginBottom: 12,
+      marginBottom: 0,
     },
     statCard: {
       flex: 1,
       backgroundColor: theme.colors.card,
-      borderRadius: 12,
+      borderRadius: 16,
       padding: 16,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
       ...Platform.select({
         ios: {
-          shadowColor: theme.colors.shadow,
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: theme.isDark ? 0.3 : 0.06,
-          shadowRadius: 8,
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 4,
         },
         android: {
           elevation: 2,
@@ -215,31 +221,35 @@ export default function StatsScreen() {
       fontSize: 13,
       fontWeight: '500',
       color: theme.colors.textSecondary,
-      marginBottom: 8,
+      marginBottom: 6,
     },
     statValue: {
       fontSize: 24,
       fontWeight: '700',
       color: theme.colors.text,
       letterSpacing: -0.5,
+      lineHeight: 28,
     },
     statSubtext: {
       fontSize: 12,
+      fontWeight: '400',
       color: theme.colors.textSecondary,
       marginTop: 4,
+      opacity: 0.8,
     },
     
     // Section headers
     sectionHeader: {
       paddingHorizontal: 16,
-      paddingTop: 16,
-      paddingBottom: 12,
+      paddingTop: 20,
+      paddingBottom: 8,
     },
     sectionTitle: {
-      fontSize: 17,
+      fontSize: 13,
       fontWeight: '600',
-      color: theme.colors.text,
-      letterSpacing: -0.2,
+      color: theme.colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
     
     // Billing cycle specific
@@ -257,28 +267,34 @@ export default function StatsScreen() {
       color: theme.colors.text,
       marginBottom: 4,
       letterSpacing: -0.5,
+      lineHeight: 38,
     },
     billingLabel: {
       fontSize: 13,
       fontWeight: '500',
       color: theme.colors.textSecondary,
+      lineHeight: 18,
     },
     
     // Renewal groups
     renewalGroup: {
-      marginBottom: 20,
+      marginBottom: 16,
     },
     renewalGroupTitle: {
-      fontSize: 15,
+      fontSize: 13,
       fontWeight: '600',
-      color: theme.colors.text,
-      marginBottom: 12,
+      color: theme.colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 8,
       paddingHorizontal: 16,
     },
     emptyText: {
       fontSize: 15,
+      fontWeight: '400',
       color: theme.colors.textSecondary,
       textAlign: 'center',
+      lineHeight: 20,
     },
   });
 
@@ -318,14 +334,14 @@ export default function StatsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Main Monthly Total Card - Clean Design */}
-        <View style={[styles.card, { marginTop: 16 }]}>
+        <View style={[styles.card, { marginTop: 16, marginBottom: 12 }]}>
           <Text style={styles.cardHeader}>MONTHLY SPENDING</Text>
           <Text style={styles.largeValue}>${totalMonthly.toFixed(2)}</Text>
           <Text style={styles.subtitle}>${totalYearly.toFixed(2)} per year</Text>
         </View>
 
         {/* Quick Stats Row */}
-        <View style={styles.statsRow}>
+        <View style={[styles.statsRow, { marginBottom: 12 }]}>
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>Average</Text>
             <Text style={styles.statValue}>${averageCost.toFixed(2)}</Text>
@@ -341,7 +357,7 @@ export default function StatsScreen() {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Billing Cycles</Text>
         </View>
-        <View style={styles.card}>
+        <View style={[styles.card, { marginBottom: 12 }]}>
           <View style={styles.billingRow}>
             <View style={styles.billingItem}>
               <Text style={styles.billingValue}>{billingDistribution.monthly}</Text>
@@ -360,7 +376,7 @@ export default function StatsScreen() {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Spending by Category</Text>
             </View>
-            <View style={styles.card}>
+            <View style={[styles.card, { marginBottom: 12 }]}>
               {categoryBreakdown.map((item) => (
                 <CategoryBar
                   key={item.category}
@@ -399,12 +415,13 @@ export default function StatsScreen() {
         {renewalTimeline.thisWeek.length > 0 && (
           <View style={styles.renewalGroup}>
             <Text style={styles.renewalGroupTitle}>This Week</Text>
-            {renewalTimeline.thisWeek.map((subscription) => (
-              <RenewalItem
-                key={subscription.id}
-                subscription={subscription}
-                onPress={() => handleRenewalPress(subscription)}
-              />
+            {renewalTimeline.thisWeek.map((subscription, index) => (
+              <View key={subscription.id} style={{ marginBottom: index < renewalTimeline.thisWeek.length - 1 ? 12 : 0 }}>
+                <RenewalItem
+                  subscription={subscription}
+                  onPress={() => handleRenewalPress(subscription)}
+                />
+              </View>
             ))}
           </View>
         )}
@@ -412,12 +429,13 @@ export default function StatsScreen() {
         {renewalTimeline.nextWeek.length > 0 && (
           <View style={styles.renewalGroup}>
             <Text style={styles.renewalGroupTitle}>Next Week</Text>
-            {renewalTimeline.nextWeek.map((subscription) => (
-              <RenewalItem
-                key={subscription.id}
-                subscription={subscription}
-                onPress={() => handleRenewalPress(subscription)}
-              />
+            {renewalTimeline.nextWeek.map((subscription, index) => (
+              <View key={subscription.id} style={{ marginBottom: index < renewalTimeline.nextWeek.length - 1 ? 12 : 0 }}>
+                <RenewalItem
+                  subscription={subscription}
+                  onPress={() => handleRenewalPress(subscription)}
+                />
+              </View>
             ))}
           </View>
         )}
@@ -425,12 +443,13 @@ export default function StatsScreen() {
         {renewalTimeline.thisMonth.length > 0 && (
           <View style={styles.renewalGroup}>
             <Text style={styles.renewalGroupTitle}>This Month</Text>
-            {renewalTimeline.thisMonth.map((subscription) => (
-              <RenewalItem
-                key={subscription.id}
-                subscription={subscription}
-                onPress={() => handleRenewalPress(subscription)}
-              />
+            {renewalTimeline.thisMonth.map((subscription, index) => (
+              <View key={subscription.id} style={{ marginBottom: index < renewalTimeline.thisMonth.length - 1 ? 12 : 0 }}>
+                <RenewalItem
+                  subscription={subscription}
+                  onPress={() => handleRenewalPress(subscription)}
+                />
+              </View>
             ))}
           </View>
         )}
@@ -438,7 +457,7 @@ export default function StatsScreen() {
         {renewalTimeline.thisWeek.length === 0 &&
           renewalTimeline.nextWeek.length === 0 &&
           renewalTimeline.thisMonth.length === 0 && (
-            <View style={styles.card}>
+            <View style={[styles.card, { marginBottom: 12 }]}>
               <Text style={styles.emptyText}>No renewals in the next 30 days</Text>
             </View>
           )}

@@ -12,6 +12,7 @@ import {
   Image,
   TouchableWithoutFeedback,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
@@ -210,21 +211,24 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
     },
     form: {
       paddingHorizontal: 16,
-      paddingTop: 24,
+      paddingTop: 20,
     },
     title: {
       fontSize: 28,
       fontWeight: '700',
       color: theme.colors.text,
-      marginBottom: 32,
+      marginBottom: 24,
+      lineHeight: 34,
     },
     field: {
-      marginBottom: 16,
+      marginBottom: 20,
     },
     label: {
-      fontSize: 15,
+      fontSize: 13,
       fontWeight: '600',
-      color: theme.colors.text,
+      color: theme.colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
       marginBottom: 8,
     },
     inputContainer: {
@@ -232,14 +236,25 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
     },
     input: {
       color: theme.colors.text,
-      backgroundColor: theme.colors.surface,
-      borderRadius: 12,
+      backgroundColor: theme.colors.card,
+      borderRadius: 16,
       paddingVertical: 16,
       paddingHorizontal: 16,
-      borderWidth: 1,
-      borderColor: 'transparent',
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
       fontSize: 16,
       height: 52,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 1,
+        },
+      }),
     },
     textArea: {
       height: 100,
@@ -248,26 +263,47 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
     inputFocused: {
       borderColor: theme.colors.primary,
       borderWidth: 2,
+      ...Platform.select({
+        ios: {
+          shadowColor: theme.colors.primary,
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+        },
+      }),
     },
     inputError: {
       borderColor: theme.colors.error,
       borderWidth: 2,
     },
     errorText: {
-      fontSize: 13,
+      fontSize: 12,
+      fontWeight: '500',
       color: theme.colors.error,
-      marginTop: 4,
+      marginTop: 6,
       marginLeft: 4,
+      lineHeight: 16,
     },
     costContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: theme.colors.surface,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'transparent',
+      backgroundColor: theme.colors.card,
+      borderRadius: 16,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
       paddingHorizontal: 16,
       height: 52,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 1,
+        },
+      }),
     },
     currencySymbol: {
       color: theme.colors.text,
@@ -288,10 +324,23 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
     },
     segmentedControl: {
       flexDirection: 'row',
-      backgroundColor: theme.colors.surface,
-      borderRadius: 12,
+      backgroundColor: theme.colors.card,
+      borderRadius: 16,
       padding: 4,
       height: 52,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 1,
+        },
+      }),
     },
     segmentButton: {
       flex: 1,
@@ -331,12 +380,14 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
       fontWeight: '700',
       color: theme.colors.text,
       letterSpacing: -0.5,
+      lineHeight: 38,
     },
     calculatedCostSuffix: {
       fontSize: 20,
       fontWeight: '500',
       color: theme.colors.textSecondary,
       marginLeft: 4,
+      lineHeight: 26,
     },
     buttonContainer: {
       padding: 16,
@@ -347,10 +398,21 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
     },
     submitButton: {
       backgroundColor: theme.colors.primary,
-      borderRadius: 12,
+      borderRadius: 26,
       alignItems: 'center',
       justifyContent: 'center',
       height: 50,
+      ...Platform.select({
+        ios: {
+          shadowColor: theme.colors.primary,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
     },
     submitButtonPressed: {
       opacity: 0.8,
@@ -367,21 +429,21 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
       left: 0,
       right: 0,
       marginTop: 4,
-      backgroundColor: theme.colors.surface,
-      borderRadius: 12,
-      borderWidth: 1,
+      backgroundColor: theme.colors.card,
+      borderRadius: 16,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: theme.colors.border,
       maxHeight: 250,
       zIndex: 1000,
       ...Platform.select({
         ios: {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
         },
         android: {
-          elevation: 8,
+          elevation: 4,
         },
       }),
     },
@@ -419,6 +481,7 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
       fontSize: 16,
       color: theme.colors.text,
       fontWeight: '500',
+      lineHeight: 22,
     },
     switchRow: {
       flexDirection: 'row',
@@ -430,12 +493,23 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      backgroundColor: theme.colors.surface,
-      borderRadius: 12,
+      backgroundColor: theme.colors.card,
+      borderRadius: 16,
       paddingVertical: 16,
       paddingHorizontal: 16,
-      borderWidth: 1,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: theme.colors.border,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#00000010',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 1,
+        },
+      }),
     },
     dateButtonPressed: {
       opacity: 0.7,
@@ -444,12 +518,16 @@ export default function SubscriptionForm({ subscription, onSubmit, onCancel, isS
       fontSize: 16,
       color: theme.colors.text,
       fontWeight: '500',
+      lineHeight: 22,
     },
     helperText: {
-      fontSize: 13,
+      fontSize: 12,
+      fontWeight: '400',
       color: theme.colors.textSecondary,
-      marginTop: 4,
+      marginTop: 6,
       marginLeft: 4,
+      lineHeight: 16,
+      opacity: 0.8,
     },
     modalOverlay: {
       flex: 1,
