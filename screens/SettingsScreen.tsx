@@ -140,7 +140,6 @@ export default function SettingsScreen() {
     },
     section: {
       marginTop: theme.spacing.lg,
-      paddingHorizontal: theme.spacing.xl,
     },
     firstSection: {
       marginTop: theme.spacing.lg,
@@ -152,13 +151,26 @@ export default function SettingsScreen() {
       textTransform: 'uppercase',
       letterSpacing: 0.5,
       marginBottom: theme.spacing.sm,
+      marginHorizontal: 16,
       paddingHorizontal: 2,
     },
     card: {
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.md,
-      padding: theme.spacing.md,
+      backgroundColor: theme.colors.card,
+      borderRadius: 16,
+      padding: 20,
+      marginHorizontal: 16,
       marginBottom: 0,
+      ...Platform.select({
+        ios: {
+          shadowColor: theme.colors.shadow,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: theme.isDark ? 0.3 : 0.08,
+          shadowRadius: 8,
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
     },
     themeRow: {
       flexDirection: 'row',
@@ -265,11 +277,11 @@ export default function SettingsScreen() {
     },
     signOutSection: {
       marginTop: theme.spacing.md,
-      paddingHorizontal: theme.spacing.xl,
+      marginHorizontal: 16,
     },
     footer: {
       marginTop: theme.spacing.lg,
-      paddingHorizontal: theme.spacing.xl,
+      marginHorizontal: 16,
       alignItems: 'center',
       marginBottom: theme.spacing.md,
     },
