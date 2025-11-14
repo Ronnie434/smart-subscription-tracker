@@ -139,25 +139,26 @@ export default function SettingsScreen() {
       paddingBottom: theme.spacing.xl,
     },
     section: {
-      marginTop: theme.spacing.md,
+      marginTop: theme.spacing.lg,
       paddingHorizontal: theme.spacing.xl,
     },
     firstSection: {
-      marginTop: 25,
+      marginTop: theme.spacing.lg,
     },
     sectionTitle: {
-      fontSize: 14,
+      fontSize: 13,
       fontWeight: '600',
       color: theme.colors.textSecondary,
       textTransform: 'uppercase',
       letterSpacing: 0.5,
-      marginBottom: theme.spacing.md,
+      marginBottom: theme.spacing.sm,
+      paddingHorizontal: 2,
     },
     card: {
       backgroundColor: theme.colors.surface,
       borderRadius: theme.borderRadius.md,
       padding: theme.spacing.md,
-      marginBottom: theme.spacing.md,
+      marginBottom: 0,
     },
     themeRow: {
       flexDirection: 'row',
@@ -213,7 +214,7 @@ export default function SettingsScreen() {
       fontSize: 18,
       fontWeight: '600',
       color: theme.colors.text,
-      marginBottom: 4,
+      marginBottom: 2,
     },
     userEmail: {
       fontSize: 14,
@@ -222,7 +223,7 @@ export default function SettingsScreen() {
     tapToChangeText: {
       fontSize: 12,
       color: theme.colors.textSecondary,
-      marginTop: 8,
+      marginTop: theme.spacing.xs,
       textAlign: 'center',
     },
     signOutButton: {
@@ -246,11 +247,12 @@ export default function SettingsScreen() {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingVertical: theme.spacing.sm,
+      paddingVertical: theme.spacing.xs + 2,
     },
     infoLabel: {
       fontSize: 16,
       color: theme.colors.text,
+      fontWeight: '500',
     },
     infoValue: {
       fontSize: 16,
@@ -259,12 +261,17 @@ export default function SettingsScreen() {
     divider: {
       height: 1,
       backgroundColor: theme.colors.border,
-      marginVertical: theme.spacing.xs,
+      marginVertical: theme.spacing.xs - 2,
+    },
+    signOutSection: {
+      marginTop: theme.spacing.md,
+      paddingHorizontal: theme.spacing.xl,
     },
     footer: {
-      marginTop: theme.spacing.xxl,
+      marginTop: theme.spacing.lg,
       paddingHorizontal: theme.spacing.xl,
       alignItems: 'center',
+      marginBottom: theme.spacing.md,
     },
     footerText: {
       fontSize: 14,
@@ -376,6 +383,24 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Sign Out Button - Close to top */}
+        <View style={styles.signOutSection}>
+          <TouchableOpacity
+            style={[styles.signOutButton, isLoading && styles.signOutButtonDisabled]}
+            onPress={handleSignOut}
+            disabled={isLoading}
+            activeOpacity={0.8}>
+            {isLoading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <>
+                <Ionicons name="log-out-outline" size={20} color="#FFFFFF" />
+                <Text style={styles.signOutButtonText}>Sign Out</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+
         {/* Appearance Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Appearance</Text>
@@ -417,24 +442,6 @@ export default function SettingsScreen() {
               <Text style={styles.infoValue}>Subscribely</Text>
             </View>
           </View>
-        </View>
-
-        {/* Sign Out Button */}
-        <View style={styles.section}>
-          <TouchableOpacity
-            style={[styles.signOutButton, isLoading && styles.signOutButtonDisabled]}
-            onPress={handleSignOut}
-            disabled={isLoading}
-            activeOpacity={0.8}>
-            {isLoading ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <>
-                <Ionicons name="log-out-outline" size={20} color="#FFFFFF" />
-                <Text style={styles.signOutButtonText}>Sign Out</Text>
-              </>
-            )}
-          </TouchableOpacity>
         </View>
 
         {/* Footer */}
