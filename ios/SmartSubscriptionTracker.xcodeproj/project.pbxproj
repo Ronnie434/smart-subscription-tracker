@@ -17,10 +17,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		13B07F961A680F5B00A75B9A /* SmartSubscriptionTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmartSubscriptionTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07F961A680F5B00A75B9A /* Subscribely.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Subscribely.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = SmartSubscriptionTracker/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SmartSubscriptionTracker/Info.plist; sourceTree = "<group>"; };
-		3B421EAD893846AE8DA6073F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = PrivacyInfo.xcprivacy; path = SmartSubscriptionTracker/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		3B421EAD893846AE8DA6073F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = PrivacyInfo.xcprivacy; path = SmartSubscriptionTracker/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		4700FA7AB0C24A4C2832531F /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-SmartSubscriptionTracker/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		8E62CEBE468FC6BC9BB06B55 /* Pods-SmartSubscriptionTracker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SmartSubscriptionTracker.release.xcconfig"; path = "Target Support Files/Pods-SmartSubscriptionTracker/Pods-SmartSubscriptionTracker.release.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = SmartSubscriptionTracker/SplashScreen.storyboard; sourceTree = "<group>"; };
@@ -81,7 +81,6 @@
 				B2D0771AC912E2EBDDCF419C /* Pods-SmartSubscriptionTracker.debug.xcconfig */,
 				8E62CEBE468FC6BC9BB06B55 /* Pods-SmartSubscriptionTracker.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -110,7 +109,7 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* SmartSubscriptionTracker.app */,
+				13B07F961A680F5B00A75B9A /* Subscribely.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -154,7 +153,7 @@
 			);
 			name = SmartSubscriptionTracker;
 			productName = SmartSubscriptionTracker;
-			productReference = 13B07F961A680F5B00A75B9A /* SmartSubscriptionTracker.app */;
+			productReference = 13B07F961A680F5B00A75B9A /* Subscribely.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -351,6 +350,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = SmartSubscriptionTracker/SmartSubscriptionTracker.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JRBD76VZ75;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -370,7 +370,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ronnie39.smartsubscriptiontracker;
-				PRODUCT_NAME = SmartSubscriptionTracker;
+				PRODUCT_NAME = Subscribely;
 				SWIFT_OBJC_BRIDGING_HEADER = "SmartSubscriptionTracker/SmartSubscriptionTracker-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -387,6 +387,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = SmartSubscriptionTracker/SmartSubscriptionTracker.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JRBD76VZ75;
 				INFOPLIST_FILE = SmartSubscriptionTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -401,7 +402,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ronnie39.smartsubscriptiontracker;
-				PRODUCT_NAME = SmartSubscriptionTracker;
+				PRODUCT_NAME = Subscribely;
 				SWIFT_OBJC_BRIDGING_HEADER = "SmartSubscriptionTracker/SmartSubscriptionTracker-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

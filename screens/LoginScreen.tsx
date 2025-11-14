@@ -11,14 +11,16 @@ import {
   Alert,
   Image,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../contexts/ThemeContext';
 import AuthInput from '../components/AuthInput';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LoginScreenProps {
-  onNavigateToSignUp: () => void;
-  onNavigateToForgotPassword: () => void;
+  // Props are optional now since we use useNavigation
+  onNavigateToSignUp?: () => void;
+  onNavigateToForgotPassword?: () => void;
 }
 
 export default function LoginScreen({
@@ -27,6 +29,62 @@ export default function LoginScreen({
 }: LoginScreenProps) {
   const { theme } = useTheme();
   const { signIn, loading: authLoading } = useAuth();
+  const navigation = useNavigation<any>();
+  
+  // Use React Navigation's navigate function, fallback to prop if provided
+  const navigateToSignUp = () => {
+    if (__DEV__) {
+      console.log('[LoginScreen] navigateToSignUp called');
+    }
+    try {
+      if (navigation?.navigate) {
+        if (__DEV__) {
+          console.log('[LoginScreen] Using React Navigation to navigate to SignUp');
+        }
+        navigation.navigate('SignUp');
+      } else if (onNavigateToSignUp) {
+        if (__DEV__) {
+          console.log('[LoginScreen] Using prop callback to navigate');
+        }
+        onNavigateToSignUp();
+      } else {
+        if (__DEV__) {
+          console.error('[LoginScreen] No navigation method available!');
+        }
+      }
+    } catch (error) {
+      if (__DEV__) {
+        console.error('[LoginScreen] Navigation error:', error);
+      }
+    }
+  };
+  
+  const navigateToForgotPassword = () => {
+    if (__DEV__) {
+      console.log('[LoginScreen] navigateToForgotPassword called');
+    }
+    try {
+      if (navigation?.navigate) {
+        if (__DEV__) {
+          console.log('[LoginScreen] Using React Navigation to navigate to ForgotPassword');
+        }
+        navigation.navigate('ForgotPassword');
+      } else if (onNavigateToForgotPassword) {
+        if (__DEV__) {
+          console.log('[LoginScreen] Using prop callback to navigate');
+        }
+        onNavigateToForgotPassword();
+      } else {
+        if (__DEV__) {
+          console.error('[LoginScreen] No navigation method available!');
+        }
+      }
+    } catch (error) {
+      if (__DEV__) {
+        console.error('[LoginScreen] Navigation error:', error);
+      }
+    }
+  };
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -239,7 +297,7 @@ export default function LoginScreen({
           {/* Forgot Password Link */}
           <TouchableOpacity
             style={styles.forgotPasswordButton}
-            onPress={onNavigateToForgotPassword}
+            onPress={navigateToForgotPassword}
             disabled={isProcessing}
             activeOpacity={0.7}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
@@ -261,7 +319,7 @@ export default function LoginScreen({
           <View style={styles.footer}>
             <Text style={styles.footerText}>Don't have an account? </Text>
             <TouchableOpacity
-              onPress={onNavigateToSignUp}
+              onPress={navigateToSignUp}
               disabled={isProcessing}
               activeOpacity={0.7}>
               <Text style={styles.signUpLink}>Sign Up</Text>

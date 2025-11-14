@@ -11,13 +11,15 @@ import {
   Alert,
   Image,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../contexts/ThemeContext';
 import AuthInput from '../components/AuthInput';
 import { useAuth } from '../contexts/AuthContext';
 
 interface SignUpScreenProps {
-  onNavigateToSignIn: () => void;
+  // Props are optional now since we use useNavigation
+  onNavigateToSignIn?: () => void;
 }
 
 // Helper functions
@@ -43,7 +45,45 @@ const getPasswordStrength = (password: string): 'weak' | 'medium' | 'strong' => 
 
 export default function SignUpScreen({ onNavigateToSignIn }: SignUpScreenProps) {
   const { theme } = useTheme();
-  const { signUp, loading: authLoading } = useAuth();
+  const { signUp, loading: authLoading, isHandlingDuplicate, clearDuplicateFlag } = useAuth();
+  const navigation = useNavigation<any>();
+  
+  // Use React Navigation's navigate function, fallback to prop if provided
+  const navigateToSignIn = () => {
+    if (__DEV__) {
+      console.log('[SignUpScreen] navigateToSignIn called');
+    }
+    try {
+      // Clear duplicate handling flag before navigating
+      // This allows the auth state to update naturally and clears user/session
+      if (isHandlingDuplicate) {
+        if (__DEV__) {
+          console.log('[SignUpScreen] Clearing duplicate handling flag before navigation');
+        }
+        clearDuplicateFlag();
+      }
+      
+      if (navigation?.navigate) {
+        if (__DEV__) {
+          console.log('[SignUpScreen] Using React Navigation to navigate to Login');
+        }
+        navigation.navigate('Login');
+      } else if (onNavigateToSignIn) {
+        if (__DEV__) {
+          console.log('[SignUpScreen] Using prop callback to navigate');
+        }
+        onNavigateToSignIn();
+      } else {
+        if (__DEV__) {
+          console.error('[SignUpScreen] No navigation method available!');
+        }
+      }
+    } catch (error) {
+      if (__DEV__) {
+        console.error('[SignUpScreen] Navigation error:', error);
+      }
+    }
+  };
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,6 +93,18 @@ export default function SignUpScreen({ onNavigateToSignIn }: SignUpScreenProps) 
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Debug: Track component lifecycle
+  React.useEffect(() => {
+    if (__DEV__) {
+      console.log('[SignUpScreen] Component mounted');
+    }
+    return () => {
+      if (__DEV__) {
+        console.log('[SignUpScreen] Component unmounted');
+      }
+    };
+  }, []);
 
   const passwordStrength = password ? getPasswordStrength(password) : null;
 
@@ -128,6 +180,10 @@ export default function SignUpScreen({ onNavigateToSignIn }: SignUpScreenProps) 
     try {
       const response = await signUp(email.trim(), password, name.trim());
 
+      if (__DEV__) {
+        console.log('[SignUpScreen] Response:', { success: response.success, message: response.message });
+      }
+
       if (response.success) {
         if (Platform.OS === 'ios') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -147,7 +203,52 @@ export default function SignUpScreen({ onNavigateToSignIn }: SignUpScreenProps) 
         if (Platform.OS === 'ios') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
-        Alert.alert('Sign Up Failed', response.message || 'Please try again.');
+        
+        // Check if it's a duplicate email error
+        const errorMessage = response.message || '';
+        const errorLower = errorMessage.toLowerCase();
+        const isDuplicateEmail = 
+          errorLower.includes('already exists') ||
+          errorLower.includes('already registered') ||
+          errorLower.includes('duplicate') ||
+          errorLower.includes('please sign in instead');
+        
+        if (__DEV__) {
+          console.log('[SignUpScreen] Error detected:', { errorMessage, isDuplicateEmail });
+        }
+        
+        if (isDuplicateEmail) {
+          // Show alert for duplicate email since component state may be lost during re-renders
+          if (__DEV__) {
+            console.log('[SignUpScreen] Showing duplicate email alert:', errorMessage);
+          }
+          
+          // Use requestAnimationFrame to ensure alert shows even if component is remounting
+          requestAnimationFrame(() => {
+            Alert.alert(
+              'Account Already Exists',
+              errorMessage,
+              [
+                {
+                  text: 'Sign In',
+                  onPress: () => {
+                    if (__DEV__) {
+                      console.log('[SignUpScreen] Sign In button pressed');
+                      console.log('[SignUpScreen] onNavigateToSignIn function exists:', !!onNavigateToSignIn);
+                      console.log('[SignUpScreen] Calling onNavigateToSignIn now...');
+                    }
+                    // Use the navigation function
+                    navigateToSignIn();
+                  },
+                },
+              ],
+              { cancelable: false } // Prevent dismissing by tapping outside
+            );
+          });
+        } else {
+          // For other errors, show alert
+          Alert.alert('Sign Up Failed', errorMessage || 'Please try again.');
+        }
       }
     } catch (error) {
       if (Platform.OS === 'ios') {
@@ -381,7 +482,7 @@ export default function SignUpScreen({ onNavigateToSignIn }: SignUpScreenProps) 
           <View style={styles.footer}>
             <Text style={styles.footerText}>Already have an account? </Text>
             <TouchableOpacity
-              onPress={onNavigateToSignIn}
+              onPress={navigateToSignIn}
               disabled={isProcessing}
               activeOpacity={0.7}>
               <Text style={styles.signInLink}>Sign In</Text>

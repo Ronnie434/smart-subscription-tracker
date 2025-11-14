@@ -10,6 +10,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../contexts/ThemeContext';
@@ -17,12 +18,42 @@ import AuthInput from '../components/AuthInput';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ForgotPasswordScreenProps {
-  onNavigateToSignIn: () => void;
+  // Props are optional now since we use useNavigation
+  onNavigateToSignIn?: () => void;
 }
 
 export default function ForgotPasswordScreen({ onNavigateToSignIn }: ForgotPasswordScreenProps) {
   const { theme } = useTheme();
   const { resetPassword, loading: authLoading } = useAuth();
+  const navigation = useNavigation<any>();
+  
+  // Use React Navigation's navigate function, fallback to prop if provided
+  const navigateToSignIn = () => {
+    if (__DEV__) {
+      console.log('[ForgotPasswordScreen] navigateToSignIn called');
+    }
+    try {
+      if (navigation?.navigate) {
+        if (__DEV__) {
+          console.log('[ForgotPasswordScreen] Using React Navigation to navigate to Login');
+        }
+        navigation.navigate('Login');
+      } else if (onNavigateToSignIn) {
+        if (__DEV__) {
+          console.log('[ForgotPasswordScreen] Using prop callback to navigate');
+        }
+        onNavigateToSignIn();
+      } else {
+        if (__DEV__) {
+          console.error('[ForgotPasswordScreen] No navigation method available!');
+        }
+      }
+    } catch (error) {
+      if (__DEV__) {
+        console.error('[ForgotPasswordScreen] Navigation error:', error);
+      }
+    }
+  };
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -238,7 +269,7 @@ export default function ForgotPasswordScreen({ onNavigateToSignIn }: ForgotPassw
             
             <TouchableOpacity
               style={styles.backButton}
-              onPress={onNavigateToSignIn}
+              onPress={navigateToSignIn}
               activeOpacity={0.8}>
               <Text style={styles.backButtonText}>Back to Sign In</Text>
             </TouchableOpacity>
@@ -261,7 +292,7 @@ export default function ForgotPasswordScreen({ onNavigateToSignIn }: ForgotPassw
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backIconButton}
-            onPress={onNavigateToSignIn}
+            onPress={navigateToSignIn}
             disabled={isProcessing}
             activeOpacity={0.7}>
             <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
@@ -311,7 +342,7 @@ export default function ForgotPasswordScreen({ onNavigateToSignIn }: ForgotPassw
             <View style={styles.footer}>
               <Text style={styles.footerText}>Remember your password? </Text>
               <TouchableOpacity
-                onPress={onNavigateToSignIn}
+                onPress={navigateToSignIn}
                 disabled={isProcessing}
                 activeOpacity={0.7}>
                 <Text style={styles.signInLink}>Sign In</Text>

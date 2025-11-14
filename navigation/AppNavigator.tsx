@@ -53,25 +53,25 @@ const SettingsStack = createStackNavigator<SettingsStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
 function AuthNavigator() {
-  const [currentScreen, setCurrentScreen] = useState<'Login' | 'SignUp' | 'ForgotPassword'>('Login');
+  const { theme } = useTheme();
+  
+  if (__DEV__) {
+    console.log('[AuthNavigator] Rendering AuthStack Navigator');
+  }
 
   return (
-    <View style={{ flex: 1 }}>
-      {currentScreen === 'Login' ? (
-        <LoginScreen
-          onNavigateToSignUp={() => setCurrentScreen('SignUp')}
-          onNavigateToForgotPassword={() => setCurrentScreen('ForgotPassword')}
-        />
-      ) : currentScreen === 'SignUp' ? (
-        <SignUpScreen
-          onNavigateToSignIn={() => setCurrentScreen('Login')}
-        />
-      ) : (
-        <ForgotPasswordScreen
-          onNavigateToSignIn={() => setCurrentScreen('Login')}
-        />
-      )}
-    </View>
+    <AuthStack.Navigator
+      screenOptions={{
+        headerShown: false,
+        cardStyle: {
+          backgroundColor: theme.colors.background,
+        },
+      }}
+      initialRouteName="Login">
+      <AuthStack.Screen name="Login" component={LoginScreen} />
+      <AuthStack.Screen name="SignUp" component={SignUpScreen} />
+      <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+    </AuthStack.Navigator>
   );
 }
 
@@ -196,7 +196,7 @@ function SettingsNavigator() {
 export default function AppNavigator() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const { user, loading: authLoading, resetInactivityTimer, error, clearError } = useAuth();
+  const { user, session, loading: authLoading, resetInactivityTimer, error, clearError, isHandlingDuplicate } = useAuth();
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
@@ -246,28 +246,21 @@ export default function AppNavigator() {
     );
   }
 
-  // Show onboarding if user hasn't seen it
-  if (showOnboarding) {
-    return (
-      <NavigationContainer ref={navigationRef} onStateChange={handleNavigationStateChange}>
-        <OnboardingScreen onComplete={handleOnboardingComplete} />
-      </NavigationContainer>
-    );
-  }
-
-  // Show auth screens if user is not authenticated
-  if (!user) {
-    return (
-      <NavigationContainer ref={navigationRef} onStateChange={handleNavigationStateChange}>
-        <AuthNavigator />
-      </NavigationContainer>
-    );
-  }
-
-  // Show main app if user is authenticated
+  // Use a single NavigationContainer to preserve navigation state
+  // This prevents remounting when switching between auth and main app
   return (
     <NavigationContainer ref={navigationRef} onStateChange={handleNavigationStateChange}>
-      <Tab.Navigator
+      {showOnboarding ? (
+        <OnboardingScreen onComplete={handleOnboardingComplete} />
+      ) : (!user || !session || isHandlingDuplicate) ? (
+        // Show auth screens if user is not authenticated OR if there's no session
+        // OR if we're handling a duplicate email (to prevent navigation reset)
+        // This handles the case where a duplicate user is created but has no valid session
+        // Use a stable key to prevent remounting when isHandlingDuplicate changes
+        <AuthNavigator key="auth-navigator" />
+      ) : (
+        // Show main app if user is authenticated AND has a valid session
+        <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
             let iconName: keyof typeof Ionicons.glyphMap;
@@ -328,6 +321,7 @@ export default function AppNavigator() {
           }}
         />
       </Tab.Navigator>
+      )}
     </NavigationContainer>
   );
 }

@@ -10,12 +10,14 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   error: string | null;
+  isHandlingDuplicate: boolean;
   signUp: (email: string, password: string, name?: string) => Promise<{ success: boolean; message?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; message?: string }>;
   clearError: () => void;
   resetInactivityTimer: () => void;
+  clearDuplicateFlag: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,6 +34,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
   
   // Ref to store signOut function for inactivity timer
   const signOutRef = useRef<(() => Promise<void>) | null>(null);
+  
+  // Ref to track if we're handling a duplicate email (to prevent navigation)
+  const isHandlingDuplicateRef = useRef(false);
+  
+  // State to track if we're handling a duplicate (for AppNavigator to show auth screens)
+  const [isHandlingDuplicate, setIsHandlingDuplicate] = useState(false);
+  
+  // Expose a function to clear the duplicate flag (for manual navigation)
+  const clearDuplicateFlag = useCallback(() => {
+    if (__DEV__) {
+      console.log('[AuthContext] Manually clearing duplicate flag for navigation');
+    }
+    isHandlingDuplicateRef.current = false;
+    setIsHandlingDuplicate(false);
+    // Also clear user/session since we're done handling the duplicate
+    setSession(null);
+    setUser(null);
+  }, []);
 
   useEffect(() => {
     // Check for existing session on mount
@@ -39,6 +59,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Don't update user state if we're handling a duplicate email
+      // This prevents navigation away from the sign-up screen
+      if (isHandlingDuplicateRef.current) {
+        if (__DEV__) {
+          console.log('[AuthContext] Ignoring auth state change - handling duplicate email');
+        }
+        return;
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -110,6 +139,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setError(null);
       setLoading(true);
+      
+      // Reset duplicate handling flag at start of signup
+      // This ensures each signup attempt starts fresh
+      isHandlingDuplicateRef.current = false;
+      
+      if (__DEV__) {
+        console.log('[SignUp] Starting signup for:', email);
+        console.log('[SignUp] Reset isHandlingDuplicateRef to false');
+      }
 
       // Sign up with Supabase Auth
       const { data, error } = await supabase.auth.signUp({
@@ -122,26 +160,373 @@ export function AuthProvider({ children }: AuthProviderProps) {
         },
       });
 
+      // Debug logging for testing duplicate email scenario
+      if (__DEV__) {
+        console.log('[SignUp] Email:', email);
+        console.log('[SignUp] Error:', error);
+        console.log('[SignUp] Data:', {
+          hasUser: !!data?.user,
+          hasSession: !!data?.session,
+          emailConfirmed: data?.user?.email_confirmed_at,
+          createdAt: data?.user?.created_at,
+        });
+      }
+
       if (error) {
         setError(error.message);
+        const readableMessage = getReadableErrorMessage(error);
+        
+        // Check if it's a duplicate email error - check both original and readable message
+        const errorLower = error.message.toLowerCase();
+        const readableLower = readableMessage.toLowerCase();
+        const isDuplicateEmail = 
+          errorLower.includes('user already registered') ||
+          errorLower.includes('email already registered') ||
+          errorLower.includes('already exists') ||
+          errorLower.includes('already been registered') ||
+          errorLower.includes('duplicate') ||
+          readableLower.includes('already exists') ||
+          readableLower.includes('already registered') ||
+          error.status === 422; // HTTP 422 Unprocessable Entity
+        
+        if (__DEV__) {
+          console.log('[SignUp] Is duplicate email:', isDuplicateEmail);
+          console.log('[SignUp] Error message:', error.message);
+          console.log('[SignUp] Readable message:', readableMessage);
+        }
+        
         return { 
           success: false, 
-          message: getReadableErrorMessage(error)
+          message: isDuplicateEmail 
+            ? 'An account with this email already exists. Please sign in instead.'
+            : readableMessage
         };
       }
 
-      // Check if email confirmation is required
-      if (data.user && !data.session) {
+      // Check if user already exists (Supabase might return user without error for existing emails)
+      if (data.user) {
+        // Check if this is a new user or existing user trying to sign up again
+        // If user has email_confirmed_at, they already have an account
+        if (data.user.email_confirmed_at) {
+          if (__DEV__) {
+            console.log('[SignUp] User already confirmed - duplicate email detected');
+          }
+          return {
+            success: false,
+            message: 'An account with this email already exists. Please sign in instead.',
+          };
+        }
+        
+        // Check if email already exists in auth.users using database function
+        // This is the most reliable way to detect duplicate emails
+        try {
+          // First check: Use database function to check if email exists in auth.users
+          const { data: emailCheck, error: emailCheckError } = await supabase
+            .rpc('check_email_exists', { check_email: email.trim() });
+          
+          if (__DEV__) {
+            console.log('[SignUp] Email exists check:', { emailCheck, emailCheckError });
+          }
+          
+          // If function doesn't exist, skip this check and use fallback methods
+          if (emailCheckError && emailCheckError.code === 'PGRST202') {
+            if (__DEV__) {
+              console.warn('[SignUp] check_email_exists function not found. Please run database/check_email_exists_function.sql in Supabase SQL Editor');
+            }
+            // Continue to fallback checks below
+          } else if (emailCheckError) {
+            if (__DEV__) {
+              console.warn('[SignUp] Error checking email existence:', emailCheckError);
+            }
+            // Continue to fallback checks below
+          } else if (emailCheck && emailCheck.length > 0 && emailCheck[0].email_exists) {
+            // Function exists and returned results
+            const existingUser = emailCheck[0];
+            
+            // If the existing user ID is different from the current user ID, it's a duplicate
+            if (existingUser.user_id && existingUser.user_id !== data.user.id) {
+              if (__DEV__) {
+                console.log('[SignUp] Email exists with different user ID - duplicate detected');
+              }
+              
+              // Set flag IMMEDIATELY to prevent any auth state changes from updating user state
+              isHandlingDuplicateRef.current = true;
+              
+              // DON'T set isHandlingDuplicate state immediately - this causes AppNavigator to remount
+              // Instead, set it after a delay to allow the alert to show first
+              // The ref flag will prevent auth state changes in the meantime
+              if (__DEV__) {
+                console.log('[SignUp] Signing out duplicate user (delaying state update to preserve navigation)');
+              }
+              
+              // Sign out the newly created user since it's a duplicate
+              // Do this asynchronously so it doesn't block error display
+              // The flag will prevent the auth state change from updating user/session
+              setTimeout(async () => {
+                try {
+                  await supabase.auth.signOut();
+                  if (__DEV__) {
+                    console.log('[SignUp] Signed out duplicate user');
+                  }
+                  
+                  // Set the state flag AFTER sign-out to show auth screens
+                  // But delay it to allow alert to be displayed first
+                  setTimeout(() => {
+                    setIsHandlingDuplicate(true);
+                    if (__DEV__) {
+                      console.log('[SignUp] Set isHandlingDuplicate state (after delay)');
+                    }
+                  }, 1000); // Delay to allow alert to show and user to interact
+                } catch (signOutError) {
+                  if (__DEV__) {
+                    console.warn('[SignUp] Error signing out duplicate user:', signOutError);
+                  }
+                  // Set state even if sign-out fails
+                  setTimeout(() => {
+                    setIsHandlingDuplicate(true);
+                  }, 1000);
+                }
+              }, 200); // Small delay to allow error to be set first
+              
+              return {
+                success: false,
+                message: 'An account with this email already exists. Please sign in instead.',
+              };
+            }
+            
+            // If email exists with same user ID but was created significantly earlier, it's a duplicate signup
+            if (existingUser.user_id === data.user.id && existingUser.created_at) {
+              const existingCreatedAt = new Date(existingUser.created_at);
+              const userCreatedAt = new Date(data.user.created_at);
+              const timeDiffSeconds = (userCreatedAt.getTime() - existingCreatedAt.getTime()) / 1000;
+              
+              if (__DEV__) {
+                console.log('[SignUp] Email exists check time diff:', timeDiffSeconds.toFixed(2));
+              }
+              
+              // If existing user was created more than 2 seconds before current user, it's a duplicate
+              // (accounting for the fact that the function might return the newly created user)
+              if (timeDiffSeconds < -2) {
+                if (__DEV__) {
+                  console.log('[SignUp] Existing user created before current - duplicate detected');
+                }
+                
+                // Set flag IMMEDIATELY to prevent any auth state changes from updating user state
+                isHandlingDuplicateRef.current = true;
+                
+                // DON'T set isHandlingDuplicate state immediately - this causes AppNavigator to remount
+                // Instead, set it after a delay to allow the alert to show first
+                // The ref flag will prevent auth state changes in the meantime
+                if (__DEV__) {
+                  console.log('[SignUp] Signing out duplicate user (delaying state update to preserve navigation)');
+                }
+                
+                // Sign out the newly created user since it's a duplicate
+                // Do this asynchronously so it doesn't block error display
+                // The flag will prevent the auth state change from updating user/session
+                setTimeout(async () => {
+                  try {
+                    await supabase.auth.signOut();
+                    if (__DEV__) {
+                      console.log('[SignUp] Signed out duplicate user');
+                    }
+                    
+                    // Set the state flag AFTER sign-out to show auth screens
+                    // But delay it to allow alert to be displayed first
+                    setTimeout(() => {
+                      setIsHandlingDuplicate(true);
+                      if (__DEV__) {
+                        console.log('[SignUp] Set isHandlingDuplicate state (after delay)');
+                      }
+                    }, 1000); // Delay to allow alert to show and user to interact
+                  } catch (signOutError) {
+                    if (__DEV__) {
+                      console.warn('[SignUp] Error signing out duplicate user:', signOutError);
+                    }
+                    // Set state even if sign-out fails
+                    setTimeout(() => {
+                      setIsHandlingDuplicate(true);
+                    }, 1000);
+                  }
+                }, 200); // Small delay to allow error to be set first
+                
+                return {
+                  success: false,
+                  message: 'An account with this email already exists. Please sign in instead.',
+                };
+              }
+            }
+          }
+          
+          // Fallback check: Look for profiles with this email (case-insensitive)
+          // This is used when the database function doesn't exist or fails
+          const { data: existingProfiles, error: profileError } = await supabase
+            .from('profiles')
+            .select('id, email, created_at')
+            .ilike('email', email.trim());
+          
+          if (__DEV__) {
+            console.log('[SignUp] Profile check (email):', { existingProfiles, profileError, count: existingProfiles?.length });
+          }
+          
+          // If multiple profiles exist for this email, it's definitely a duplicate
+          if (existingProfiles && existingProfiles.length > 1) {
+            if (__DEV__) {
+              console.log('[SignUp] Multiple profiles found - duplicate email detected');
+            }
+            return {
+              success: false,
+              message: 'An account with this email already exists. Please sign in instead.',
+            };
+          }
+          
+          // If a profile exists, check if it's older than this signup attempt
+          if (existingProfiles && existingProfiles.length === 1) {
+            const existingProfile = existingProfiles[0];
+            const profileCreatedAt = new Date(existingProfile.created_at);
+            const userCreatedAt = new Date(data.user.created_at);
+            const timeDiffSeconds = (userCreatedAt.getTime() - profileCreatedAt.getTime()) / 1000;
+            
+            if (__DEV__) {
+              console.log('[SignUp] Profile found:', {
+                profileId: existingProfile.id,
+                userId: data.user.id,
+                profileCreated: existingProfile.created_at,
+                userCreated: data.user.created_at,
+                timeDiffSeconds: timeDiffSeconds.toFixed(2)
+              });
+            }
+            
+            // If profile ID doesn't match user ID, it's definitely a duplicate (different user)
+            if (existingProfile.id !== data.user.id) {
+              if (__DEV__) {
+                console.log('[SignUp] Profile ID mismatch - duplicate email detected');
+              }
+              return {
+                success: false,
+                message: 'An account with this email already exists. Please sign in instead.',
+              };
+            }
+            
+            // If profile was created more than 5 seconds before user, it's an existing account
+            // (accounting for trigger delay which should be < 1 second)
+            if (timeDiffSeconds > 5) {
+              if (__DEV__) {
+                console.log('[SignUp] Profile significantly older than user - duplicate email detected');
+              }
+              return {
+                success: false,
+                message: 'An account with this email already exists. Please sign in instead.',
+              };
+            }
+          }
+          
+          // Second check: Wait a moment and re-check for profiles with this email
+          // This handles the case where the trigger hasn't run yet, or we need to check again
+          if (existingProfiles && existingProfiles.length === 0) {
+            // Wait 500ms for trigger to potentially complete
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Re-check for profiles with this email (in case original profile exists)
+            const { data: retryProfiles, error: retryError } = await supabase
+              .from('profiles')
+              .select('id, email, created_at')
+              .ilike('email', email.trim());
+            
+            if (__DEV__) {
+              console.log('[SignUp] Profile re-check (email after delay):', { retryProfiles, retryError, count: retryProfiles?.length });
+            }
+            
+            // If we now find a profile with this email but different user ID, it's a duplicate
+            if (retryProfiles && retryProfiles.length > 0 && data.user) {
+              const currentUserId = data.user.id;
+              const foundProfile = retryProfiles.find(p => p.id !== currentUserId);
+              if (foundProfile) {
+                if (__DEV__) {
+                  console.log('[SignUp] Found existing profile with different ID - duplicate email detected');
+                }
+                return {
+                  success: false,
+                  message: 'An account with this email already exists. Please sign in instead.',
+                };
+              }
+              
+              // If profile exists with same ID, check creation time
+              const sameIdProfile = retryProfiles.find(p => p.id === currentUserId);
+              if (sameIdProfile) {
+                const profileCreatedAt = new Date(sameIdProfile.created_at);
+                const userCreatedAt = new Date(data.user.created_at);
+                const timeDiffSeconds = (userCreatedAt.getTime() - profileCreatedAt.getTime()) / 1000;
+                
+                if (__DEV__) {
+                  console.log('[SignUp] Profile time diff (after delay):', timeDiffSeconds.toFixed(2));
+                }
+                
+                // If profile is more than 2 seconds older, it's likely a duplicate
+                if (timeDiffSeconds > 2) {
+                  if (__DEV__) {
+                    console.log('[SignUp] Profile older than user (after delay) - duplicate email detected');
+                  }
+                  return {
+                    success: false,
+                    message: 'An account with this email already exists. Please sign in instead.',
+                  };
+                }
+              }
+            }
+          }
+        } catch (profileCheckError) {
+          if (__DEV__) {
+            console.warn('[SignUp] Error checking profile:', profileCheckError);
+          }
+          // If profile check fails, fall back to timestamp check
+        }
+        
+        // Fallback: Check if user was created more than 10 seconds ago (likely an existing user)
+        // New signups will have a very recent created_at timestamp (within 1-2 seconds)
+        const userCreatedAt = new Date(data.user.created_at);
+        const now = new Date();
+        const secondsSinceCreation = (now.getTime() - userCreatedAt.getTime()) / 1000;
+        
+        if (__DEV__) {
+          console.log('[SignUp] User created:', data.user.created_at);
+          console.log('[SignUp] Seconds since creation:', secondsSinceCreation);
+        }
+        
+        // If user was created more than 10 seconds ago and has no session, it's likely a duplicate
+        // Using 10 seconds to be safe (account for network delays, etc.)
+        if (secondsSinceCreation > 10 && !data.session) {
+          if (__DEV__) {
+            console.log('[SignUp] Old user without session - duplicate email detected');
+          }
+          return {
+            success: false,
+            message: 'An account with this email already exists. Please sign in instead.',
+          };
+        }
+        
+        // If no session and email not confirmed, it's waiting for confirmation (new user)
+        if (!data.session) {
+          if (__DEV__) {
+            console.log('[SignUp] New user - waiting for email confirmation');
+          }
         return {
           success: true,
           message: 'Please check your email to confirm your account.',
         };
+        }
       }
 
+      if (__DEV__) {
+        console.log('[SignUp] Success - user signed up and logged in');
+      }
       return { success: true };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create account';
       setError(message);
+      if (__DEV__) {
+        console.error('[SignUp] Exception:', err);
+      }
       return { success: false, message };
     } finally {
       setLoading(false);
@@ -301,6 +686,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     session,
     loading,
     error,
+    isHandlingDuplicate,
     signUp,
     signIn,
     signOut,
@@ -308,6 +694,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     clearError,
     // Expose resetTimer for manual activity tracking
     resetInactivityTimer: resetTimer,
+    clearDuplicateFlag,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -326,6 +713,19 @@ export function useAuth(): AuthContextType {
  */
 function getReadableErrorMessage(error: AuthError): string {
   const errorMessage = error.message.toLowerCase();
+  const errorCode = error.status?.toString() || '';
+
+  // Check for duplicate email/account errors
+  if (
+    errorMessage.includes('user already registered') ||
+    errorMessage.includes('email already registered') ||
+    errorMessage.includes('already exists') ||
+    errorMessage.includes('already been registered') ||
+    errorMessage.includes('duplicate') ||
+    errorCode === '422' // Unprocessable Entity - often used for duplicate entries
+  ) {
+    return 'An account with this email already exists. Please sign in instead.';
+  }
 
   if (errorMessage.includes('invalid login credentials')) {
     return 'Invalid email or password. Please try again.';
@@ -333,10 +733,6 @@ function getReadableErrorMessage(error: AuthError): string {
   
   if (errorMessage.includes('email not confirmed')) {
     return 'Please confirm your email address before signing in.';
-  }
-  
-  if (errorMessage.includes('user already registered')) {
-    return 'An account with this email already exists.';
   }
   
   if (errorMessage.includes('invalid email')) {
