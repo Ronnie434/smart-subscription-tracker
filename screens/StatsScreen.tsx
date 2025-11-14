@@ -35,7 +35,7 @@ type StatsScreenNavigationProp = StackNavigationProp<SubscriptionsStackParamList
 export default function StatsScreen() {
   const { theme } = useTheme();
   const navigation = useNavigation<StatsScreenNavigationProp>();
-  const { user } = useAuth();
+  const { user, resetInactivityTimer } = useAuth();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -85,9 +85,11 @@ export default function StatsScreen() {
   // Refresh data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
+      // Reset inactivity timer when screen comes into focus
+      resetInactivityTimer();
       loadSubscriptions(true);
       return () => {};
-    }, [])
+    }, [resetInactivityTimer])
   );
 
   const handleRefresh = async () => {

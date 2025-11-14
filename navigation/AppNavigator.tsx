@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useState, useEffect, useRef } from 'react';
+import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -196,13 +196,30 @@ function SettingsNavigator() {
 export default function AppNavigator() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, resetInactivityTimer, error, clearError } = useAuth();
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const navigationRef = useRef<NavigationContainerRef<any>>(null);
 
   useEffect(() => {
     checkOnboardingStatus();
   }, []);
+
+  // Clear errors when user is logged out (on login screen)
+  useEffect(() => {
+    if (!user && error) {
+      // Clear any errors when showing login screen
+      clearError();
+    }
+  }, [user, error, clearError]);
+
+  // Handle navigation state changes to reset inactivity timer
+  const handleNavigationStateChange = () => {
+    if (user) {
+      // Reset inactivity timer on any navigation event when user is authenticated
+      resetInactivityTimer();
+    }
+  };
 
   const checkOnboardingStatus = async () => {
     try {
@@ -232,7 +249,7 @@ export default function AppNavigator() {
   // Show onboarding if user hasn't seen it
   if (showOnboarding) {
     return (
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef} onStateChange={handleNavigationStateChange}>
         <OnboardingScreen onComplete={handleOnboardingComplete} />
       </NavigationContainer>
     );
@@ -241,7 +258,7 @@ export default function AppNavigator() {
   // Show auth screens if user is not authenticated
   if (!user) {
     return (
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef} onStateChange={handleNavigationStateChange}>
         <AuthNavigator />
       </NavigationContainer>
     );
@@ -249,7 +266,7 @@ export default function AppNavigator() {
 
   // Show main app if user is authenticated
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef} onStateChange={handleNavigationStateChange}>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {

@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
 import { Session, User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../config/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { migrateLocalSubscriptions } from '../services/subscriptionService';
+import { useInactivityTimer } from '../hooks/useInactivityTimer';
 
 interface AuthContextType {
   user: User | null;
@@ -14,6 +15,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; message?: string }>;
   clearError: () => void;
+  resetInactivityTimer: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,6 +29,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Ref to store signOut function for inactivity timer
+  const signOutRef = useRef<(() => Promise<void>) | null>(null);
 
   useEffect(() => {
     // Check for existing session on mount
@@ -37,12 +42,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Reset inactivity timer when user logs in
+      if (session?.user) {
+        resetTimer();
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [resetTimer]);
 
   const initializeAuth = async () => {
     try {
@@ -50,8 +60,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
+        // Only log errors, don't show to user during initialization
+        // Most auth errors during init are expected (no session, expired session, etc.)
         console.error('Error getting session:', error);
-        setError(error.message);
+        // Don't set error state - these are usually expected scenarios
       } else {
         setSession(session);
         setUser(session?.user ?? null);
@@ -62,8 +74,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       }
     } catch (err) {
+      // Only log initialization errors, don't show to user
+      // These are usually network issues or setup problems that shouldn't block the app
       console.error('Error initializing auth:', err);
-      setError('Failed to initialize authentication');
+      // Don't set error state - let user try to sign in
     } finally {
       setLoading(false);
     }
@@ -165,6 +179,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Trigger migration after successful sign in
       performMigration();
 
+      // Reset inactivity timer on successful login
+      resetTimer();
+
       return { success: true };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to sign in';
@@ -175,9 +192,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const signOut = async (): Promise<void> => {
+  const signOut = useCallback(async (silent: boolean = false): Promise<void> => {
     try {
-      setError(null);
+      // Clear error state unless it's a silent logout (auto-logout)
+      if (!silent) {
+        setError(null);
+      }
       setLoading(true);
 
       // Clear local subscription data
@@ -186,21 +206,59 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        setError(error.message);
+        // Only set error if it's not a silent logout and not an expected auth error
+        // AuthSessionMissingError is expected during auto-logout when session is already expired
+        const isExpectedAuthError = error.message.includes('AuthSessionMissingError') || 
+                                     error.message.includes('session');
+        
+        if (!silent && !isExpectedAuthError) {
+          setError(error.message);
+        }
+        // Always log errors for debugging, but don't show to user during auto-logout
         console.error('Error signing out:', error);
       }
 
       // Reset state
       setUser(null);
       setSession(null);
+      
+      // Clear error on successful logout (even if there was an error, user is logged out)
+      setError(null);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to sign out';
-      setError(message);
+      // Only set error if it's not a silent logout
+      if (!silent) {
+        const message = err instanceof Error ? err.message : 'Failed to sign out';
+        setError(message);
+      }
       console.error('Error signing out:', err);
+      
+      // Reset state even if there was an error
+      setUser(null);
+      setSession(null);
+      setError(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Store signOut in ref for inactivity timer
+  useEffect(() => {
+    signOutRef.current = signOut;
+  }, [signOut]);
+
+  // Set up inactivity timer for auto-logout
+  // Only enabled when user is authenticated
+  const { resetTimer } = useInactivityTimer({
+    timeout: 5 * 60 * 1000, // 5 minutes
+    onTimeout: async () => {
+      console.log('Auto-logout triggered due to inactivity');
+      if (signOutRef.current) {
+        // Use silent logout to prevent error messages from showing
+        await signOutRef.current(true);
+      }
+    },
+    enabled: !!user, // Only enable when user is logged in
+  });
 
   const resetPassword = async (
     email: string
@@ -248,6 +306,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signOut,
     resetPassword,
     clearError,
+    // Expose resetTimer for manual activity tracking
+    resetInactivityTimer: resetTimer,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

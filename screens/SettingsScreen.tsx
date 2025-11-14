@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Modal, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
@@ -27,7 +28,7 @@ const USER_ICONS = [
 const ICON_STORAGE_KEY = '@user_icon_preference';
 
 export default function SettingsScreen() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, resetInactivityTimer } = useAuth();
   const { theme, themeMode, setThemeMode } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState<string>('person');
@@ -37,6 +38,13 @@ export default function SettingsScreen() {
   useEffect(() => {
     loadIconPreference();
   }, []);
+
+  // Reset inactivity timer when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      resetInactivityTimer();
+    }, [resetInactivityTimer])
+  );
 
   const loadIconPreference = async () => {
     try {
