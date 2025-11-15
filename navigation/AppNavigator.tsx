@@ -52,7 +52,7 @@ const StatsStack = createStackNavigator<StatsStackParamList>();
 const SettingsStack = createStackNavigator<SettingsStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
-function AuthNavigator() {
+function AuthNavigator({ initialRoute = 'Login' }: { initialRoute?: 'Login' | 'SignUp' }) {
   const { theme } = useTheme();
   
   if (__DEV__) {
@@ -67,7 +67,7 @@ function AuthNavigator() {
           backgroundColor: theme.colors.background,
         },
       }}
-      initialRouteName="Login">
+      initialRouteName={initialRoute}>
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="SignUp" component={SignUpScreen} />
       <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
@@ -199,6 +199,7 @@ export default function AppNavigator() {
   const { user, session, loading: authLoading, resetInactivityTimer, error, clearError, isHandlingDuplicate } = useAuth();
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [justCompletedOnboarding, setJustCompletedOnboarding] = useState(false);
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
 
   useEffect(() => {
@@ -234,8 +235,20 @@ export default function AppNavigator() {
   };
 
   const handleOnboardingComplete = () => {
+    setJustCompletedOnboarding(true);
     setShowOnboarding(false);
   };
+
+  // Reset the flag after navigation is complete
+  useEffect(() => {
+    if (justCompletedOnboarding && !showOnboarding) {
+      // Reset after a brief delay to ensure navigation has completed
+      const timer = setTimeout(() => {
+        setJustCompletedOnboarding(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [justCompletedOnboarding, showOnboarding]);
 
   // Show loading indicator while checking auth or onboarding status
   if (isCheckingOnboarding || authLoading) {
@@ -257,7 +270,11 @@ export default function AppNavigator() {
         // OR if we're handling a duplicate email (to prevent navigation reset)
         // This handles the case where a duplicate user is created but has no valid session
         // Use a stable key to prevent remounting when isHandlingDuplicate changes
-        <AuthNavigator key="auth-navigator" />
+        // Navigate to SignUp if user just completed onboarding
+        <AuthNavigator 
+          key="auth-navigator" 
+          initialRoute={justCompletedOnboarding ? 'SignUp' : 'Login'}
+        />
       ) : (
         // Show main app if user is authenticated AND has a valid session
         <Tab.Navigator
