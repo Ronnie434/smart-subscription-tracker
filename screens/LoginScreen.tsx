@@ -291,6 +291,8 @@ export default function LoginScreen({
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
+            textContentType="emailAddress"
+            importantForAutofill="yes"
             error={emailError}
             editable={!isProcessing}
           />
@@ -304,6 +306,8 @@ export default function LoginScreen({
             placeholder="Password"
             secureTextEntry
             autoComplete="password"
+            textContentType="password"
+            importantForAutofill="yes"
             error={passwordError}
             editable={!isProcessing}
           />
